@@ -1,0 +1,15 @@
+# Office 임시 lock 파일
+~$*
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# IDE / Claude Code 로컬 설정
+.claude/
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc

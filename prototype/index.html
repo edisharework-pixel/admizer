@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>ADMIZER V1 — UI 프로토타입</title>
+<meta name="viewport" content="width=1280">
+<style>
+  :root {
+    --c-bg: #F4F6FA;
+    --c-card: #FFFFFF;
+    --c-border: #E2E8F0;
+    --c-text: #1A202C;
+    --c-text-muted: #718096;
+    --c-primary: #1E2761;
+    --c-primary-light: #CADCFC;
+    --c-critical: #D9534F;
+    --c-warning: #F0AD4E;
+    --c-info: #5CB85C;
+    --c-success: #38A169;
+    --c-danger-bg: #FEF2F2;
+    --c-warn-bg: #FFFBEB;
+    --c-info-bg: #F0FDF4;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+         font-size: 14px; color: var(--c-text); background: var(--c-bg); line-height: 1.5; }
+
+  /* === 글로벌 헤더 === */
+  .gnb { background: var(--c-primary); color: #fff; padding: 0 24px; height: 56px;
+         display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .gnb-left { display: flex; align-items: center; gap: 32px; }
+  .gnb-logo { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+  .gnb-nav { display: flex; gap: 4px; }
+  .gnb-nav a { color: rgba(255,255,255,0.72); text-decoration: none; padding: 8px 14px;
+               border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; }
+  .gnb-nav a.active { color: #fff; background: rgba(255,255,255,0.14); }
+  .gnb-nav a:hover { color: #fff; }
+  .gnb-right { display: flex; align-items: center; gap: 12px; }
+  .mode-toggle { display: flex; background: rgba(255,255,255,0.12); border-radius: 20px; padding: 3px; }
+  .mode-toggle button { background: transparent; border: 0; padding: 5px 14px; border-radius: 16px;
+                       color: rgba(255,255,255,0.72); cursor: pointer; font-size: 12px; font-weight: 600; }
+  .mode-toggle button.active { background: #fff; color: var(--c-primary); }
+  .icon-btn { background: transparent; border: 0; color: #fff; cursor: pointer; font-size: 18px;
+              padding: 6px; border-radius: 6px; position: relative; }
+  .icon-btn:hover { background: rgba(255,255,255,0.14); }
+  .badge-dot { position: absolute; top: 4px; right: 4px; background: var(--c-critical);
+               width: 16px; height: 16px; border-radius: 10px; font-size: 10px; color: #fff;
+               display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  /* === 페이지 레이아웃 === */
+  .page { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .page-tools { display: flex; gap: 8px; align-items: center; }
+
+  /* === 공용 컨트롤 === */
+  .btn { background: #fff; border: 1px solid var(--c-border); padding: 6px 12px; border-radius: 6px;
+         font-size: 13px; cursor: pointer; color: var(--c-text); font-weight: 500; }
+  .btn:hover { background: var(--c-bg); }
+  .btn-primary { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
+  .btn-primary:hover { background: #151C47; }
+  .select { background: #fff; border: 1px solid var(--c-border); padding: 6px 10px; border-radius: 6px;
+            font-size: 13px; cursor: pointer; color: var(--c-text); }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px;
+          font-size: 11px; font-weight: 600; letter-spacing: 0.2px; }
+  .chip-critical { background: var(--c-danger-bg); color: var(--c-critical); }
+  .chip-warning { background: var(--c-warn-bg); color: #B45309; }
+  .chip-info { background: var(--c-info-bg); color: var(--c-success); }
+  .chip-type { background: var(--c-primary-light); color: var(--c-primary); }
+
+  /* === KPI 띠 === */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .kpi { background: var(--c-card); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+  .kpi-label { font-size: 12px; color: var(--c-text-muted); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .kpi-tooltip { display: inline-block; margin-left: 4px; cursor: help; color: var(--c-text-muted); font-size: 11px; }
+  .kpi-value { font-size: 26px; font-weight: 800; margin-top: 8px; font-family: -apple-system, "SF Pro Display", sans-serif; }
+  .kpi-delta { font-size: 12px; margin-top: 4px; color: var(--c-text-muted); }
+  .kpi-delta.up { color: var(--c-success); }
+  .kpi-delta.down { color: var(--c-critical); }
+  .kpi-bar { background: var(--c-border); height: 4px; border-radius: 4px; margin-top: 10px; position: relative; overflow: hidden; }
+  .kpi-bar-fill { background: var(--c-primary); height: 100%; border-radius: 4px; }
+  .kpi-bar-fill.kpi-bar-normal { background: var(--c-success); }
+  .kpi-bar-fill.kpi-bar-warn { background: var(--c-warning); }
+  .kpi-bar-fill.kpi-bar-bad { background: var(--c-critical); }
+
+  /* === 인사이트 카드 === */
+  .section { background: var(--c-card); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 700; }
+  .section-link { color: var(--c-primary); text-decoration: none; font-size: 13px; font-weight: 500; }
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .insight-card { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px 16px; background: #FAFBFC; }
+  .insight-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .insight-title { font-weight: 700; font-size: 14px; }
+  .insight-body { font-size: 13px; color: var(--c-text); line-height: 1.55; margin-bottom: 10px; }
+  .insight-target { font-size: 12px; color: var(--c-text-muted); margin-bottom: 10px; }
+  .insight-actions { display: flex; gap: 6px; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-link { background: transparent; border: 0; color: var(--c-primary); font-weight: 500; cursor: pointer; padding: 4px 6px; font-size: 12px; }
+
+  /* === 순위 그리드 === */
+  .rank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .rank-card { background: var(--c-card); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+  .rank-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .rank-title { font-size: 13px; font-weight: 700; color: var(--c-text); }
+  .rank-icon { font-size: 16px; }
+  .rank-list { list-style: none; }
+  .rank-list li { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed var(--c-border); }
+  .rank-list li:last-child { border-bottom: 0; }
+  .rank-list .rank-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
+  .rank-list .rank-value { font-weight: 700; color: var(--c-primary); font-variant-numeric: tabular-nums; }
+  .rank-list .rank-value.bad { color: var(--c-critical); }
+  .rank-more { text-align: right; margin-top: 8px; font-size: 12px; }
+  .rank-more a { color: var(--c-primary); text-decoration: none; }
+  .rank-empty { color: var(--c-text-muted); font-size: 13px; padding: 6px 0; }
+
+  /* === 캠페인 페이지 === */
+  .campaign-layout { display: grid; grid-template-columns: 180px 1fr; gap: 20px; }
+  .subtabs { display: flex; flex-direction: column; gap: 4px; }
+  .subtab { padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+            display: flex; justify-content: space-between; align-items: center; }
+  .subtab.active { background: var(--c-primary); color: #fff; }
+  .subtab .count { background: rgba(255,255,255,0.25); color: inherit; font-size: 11px; padding: 2px 7px; border-radius: 10px; }
+  .subtab:not(.active) .count { background: var(--c-border); color: var(--c-text-muted); }
+
+  .table-wrap { background: var(--c-card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .table-toolbar { padding: 12px 16px; border-bottom: 1px solid var(--c-border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  table.camp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .camp-table th { background: #F7FAFC; font-weight: 600; text-align: left; padding: 10px 12px; color: var(--c-text-muted);
+                   font-size: 12px; border-bottom: 1px solid var(--c-border); position: sticky; top: 0; }
+  .camp-table td { padding: 10px 12px; border-bottom: 1px solid #EDF2F7; vertical-align: middle; }
+  .camp-table tr:hover { background: #FAFBFC; cursor: pointer; }
+  .camp-table tr.selected { background: #EEF4FF; }
+  .camp-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .camp-table .camp-name { font-weight: 500; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .status-dot { display: inline-block; width: 6px; height: 6px; background: var(--c-success); border-radius: 4px; margin-right: 6px; }
+
+  /* === 진단 패널 === */
+  .diagnose { background: var(--c-card); border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 16px; padding: 24px; }
+  .diagnose-head { border-bottom: 1px solid var(--c-border); padding-bottom: 14px; margin-bottom: 16px; }
+  .diagnose-head h3 { font-size: 16px; margin-bottom: 6px; }
+  .diagnose-meta { font-size: 12px; color: var(--c-text-muted); }
+  .area-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 14px 0; }
+  .area-table th { background: #F7FAFC; padding: 8px 10px; font-weight: 600; color: var(--c-text-muted); font-size: 11px; text-align: right; border-bottom: 1px solid var(--c-border); }
+  .area-table th:first-child { text-align: left; }
+  .area-table td { padding: 10px; font-variant-numeric: tabular-nums; text-align: right; border-bottom: 1px solid #EDF2F7; }
+  .area-table td:first-child { text-align: left; font-weight: 600; }
+  .summary { background: #F9FAFB; border-left: 3px solid var(--c-primary); padding: 12px 14px; border-radius: 4px; font-size: 13px; margin: 12px 0; }
+  .action-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+  .action-card { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px; background: #FFF; }
+  .action-card h4 { font-size: 13px; margin-bottom: 6px; }
+  .action-card .count { font-size: 22px; font-weight: 800; color: var(--c-primary); margin: 4px 0 10px; font-variant-numeric: tabular-nums; }
+  .action-card .radio-group { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
+  .action-card .radio-group label { font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .action-card button { width: 100%; padding: 6px 0; font-size: 12px; }
+
+  /* 키워드 표 */
+  .kw-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+  .kw-table th { background: #F7FAFC; padding: 6px 8px; font-weight: 600; color: var(--c-text-muted); font-size: 11px; text-align: right; }
+  .kw-table th:first-child { text-align: left; }
+  .kw-table td { padding: 6px 8px; font-variant-numeric: tabular-nums; text-align: right; border-bottom: 1px solid #EDF2F7; }
+  .kw-table td:first-child { text-align: left; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* === V2 스텁 === */
+  .v2-stub { background: #F7FAFC; border: 1px dashed var(--c-border); border-radius: var(--radius); padding: 14px 16px; margin-top: 14px; color: var(--c-text-muted); font-size: 13px; }
+  .v2-stub h4 { font-size: 13px; color: var(--c-text); margin-bottom: 4px; }
+  .v2-stub .v2-tag { background: var(--c-warn-bg); color: #B45309; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; font-weight: 700; }
+
+  /* === 간단/전문가 모드 숨김 === */
+  body.mode-simple .pro-only { display: none !important; }
+  body.mode-pro .simple-only { display: none !important; }
+
+  /* === 탭 뷰 전환 === */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* === 숫자 컬러 === */
+  .good { color: var(--c-success); }
+  .bad { color: var(--c-critical); }
+  .neutral { color: var(--c-text-muted); }
+
+  /* === 작은 그래프 (sparkline) === */
+  .bar-mini { display: inline-block; height: 4px; background: var(--c-border); border-radius: 2px; vertical-align: middle; margin-left: 4px; position: relative; width: 60px; }
+  .bar-mini-fill { height: 100%; background: var(--c-primary); border-radius: 2px; }
+
+  /* === 알림 벨 팝오버 === */
+  .bell-popover { position: absolute; top: 48px; right: 24px; width: 340px; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 200; display: none; }
+  .bell-popover.open { display: block; }
+  .bell-head { padding: 12px 16px; border-bottom: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
+  .bell-list { max-height: 380px; overflow-y: auto; }
+  .bell-item { padding: 10px 16px; border-bottom: 1px solid #EDF2F7; font-size: 13px; cursor: pointer; }
+  .bell-item:hover { background: #FAFBFC; }
+  .bell-item .bell-ts { color: var(--c-text-muted); font-size: 11px; margin-top: 2px; }
+  .bell-foot { padding: 10px 16px; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; font-size: 12px; }
+  .bell-foot a { color: var(--c-primary); text-decoration: none; }
+
+  /* === 모달 === */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; display: none; align-items: center; justify-content: center; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: #fff; border-radius: var(--radius); width: 480px; max-width: 90vw; }
+  .modal-head { padding: 16px 20px; border-bottom: 1px solid var(--c-border); font-weight: 700; font-size: 15px; }
+  .modal-body { padding: 20px; font-size: 13px; }
+  .modal-body .compare { background: #F7FAFC; border-radius: 6px; padding: 12px; margin: 12px 0; font-variant-numeric: tabular-nums; }
+  .modal-body .notice { color: #B45309; background: var(--c-warn-bg); padding: 8px 12px; border-radius: 4px; font-size: 12px; margin: 10px 0; }
+  .modal-foot { padding: 12px 20px; border-top: 1px solid var(--c-border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* === 푸터 데모 안내 === */
+  .demo-notice { position: fixed; bottom: 16px; right: 16px; background: var(--c-primary); color: #fff;
+                 padding: 8px 14px; font-size: 12px; border-radius: 20px; z-index: 50; opacity: 0.9; }
+</style>
+</head>
+<body class="mode-simple">
+
+<!-- === GNB === -->
+<div class="gnb">
+  <div class="gnb-left">
+    <div class="gnb-logo">ADMIZER</div>
+    <nav class="gnb-nav">
+      <a data-view="dashboard" class="active">통합분석 대시보드</a>
+      <a data-view="campaigns">캠페인 분석·관리</a>
+      <a data-view="rules">규칙·알림</a>
+      <a data-view="insights">인사이트</a>
+    </nav>
+  </div>
+  <div class="gnb-right">
+    <div class="mode-toggle">
+      <button data-mode="simple" class="active">간단</button>
+      <button data-mode="pro">전문가</button>
+    </div>
+    <button class="icon-btn" id="bell-btn" title="알림">
+      🔔 <span class="badge-dot" id="bell-count">-</span>
+    </button>
+    <button class="icon-btn" title="설정">⚙</button>
+    <button class="icon-btn" title="계정">👤</button>
+  </div>
+</div>
+
+<!-- 알림 벨 팝오버 -->
+<div class="bell-popover" id="bell-popover">
+  <div class="bell-head">
+    <span>알림 (<span id="bell-count-text">-</span>)</span>
+    <button class="btn-link">모두 읽음</button>
+  </div>
+  <div class="bell-list" id="bell-list"></div>
+  <div class="bell-foot">
+    <a>알림 설정 →</a>
+    <a>전체 보기 →</a>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 1) 대시보드 -->
+<!-- ============================================ -->
+<div class="page view active" id="view-dashboard">
+  <div class="page-header">
+    <h1 class="page-title">통합분석 대시보드</h1>
+    <div class="page-tools">
+      <select class="select"><option>최근 7일</option><option>14일</option><option>30일</option></select>
+      <select class="select"><option>vs 전주</option><option>vs 전월</option><option>vs 전년</option></select>
+      <button class="btn">🔄 새로고침</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-strip" id="kpi-strip"></div>
+
+  <!-- 인사이트 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">ADMIZER 인사이트</div>
+      <a class="section-link" data-view="insights">더보기 (<span id="insight-total-count">-</span>) →</a>
+    </div>
+    <div class="insight-grid" id="insight-grid"></div>
+  </div>
+
+  <!-- 순위 그리드 -->
+  <div class="rank-grid" id="rank-grid"></div>
+</div>
+
+<!-- ============================================ -->
+<!-- 2) 캠페인 분석·관리 -->
+<!-- ============================================ -->
+<div class="page view" id="view-campaigns">
+  <div class="page-header">
+    <h1 class="page-title">광고캠페인 분석·관리</h1>
+    <div class="page-tools">
+      <button class="btn">🔄 새로고침</button>
+    </div>
+  </div>
+
+  <div class="campaign-layout">
+    <div class="subtabs">
+      <div class="subtab active" data-subtab="diagnose">진단 <span class="count" id="tab-diagnose-count">-</span></div>
+      <div class="subtab" data-subtab="compare">기간 비교</div>
+      <div class="subtab" data-subtab="logs">변경 로그 <span class="count">0</span></div>
+      <div class="subtab" data-subtab="schedule">노출시간 <span class="count">0</span></div>
+    </div>
+
+    <div class="subtab-content">
+      <!-- 진단 -->
+      <div id="sub-diagnose">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <select class="select"><option>전체 유형</option><option>매출 최적화</option><option>수동 성과형</option></select>
+            <input class="select" placeholder="캠페인 검색..." style="flex:1; max-width: 260px;">
+            <select class="select"><option>광고비 ↓</option><option>ROAS ↑</option><option>ROAS ↓</option><option>매출 ↓</option></select>
+            <div style="flex:1"></div>
+            <button class="btn pro-only">필드 설정 [+]</button>
+          </div>
+          <table class="camp-table" id="camp-table">
+            <thead>
+              <tr>
+                <th style="width:32px"><input type="checkbox"></th>
+                <th>캠페인</th>
+                <th>유형</th>
+                <th class="num">매출</th>
+                <th class="num">광고비</th>
+                <th class="num">ROAS</th>
+                <th class="num">전환율</th>
+                <th class="num pro-only">CPC</th>
+                <th class="num pro-only">노출수</th>
+                <th class="num pro-only">클릭률</th>
+                <th class="num pro-only">ACOS</th>
+                <th class="num pro-only">판매수량</th>
+              </tr>
+            </thead>
+            <tbody id="camp-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- 진단 패널 -->
+        <div class="diagnose" id="diagnose-panel" style="display:none;"></div>
+      </div>
+
+      <!-- 기간 비교 -->
+      <div id="sub-compare" style="display:none;">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">기간 비교 분석</div>
+            <div style="color:var(--c-text-muted); font-size:12px;">좌·우 기간 완전 독립 편집 (핵심 차별 UX)</div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center; margin-bottom:16px;">
+            <div style="padding:12px 14px; background:#F7FAFC; border-radius:6px;">
+              <div style="font-size:12px; color:var(--c-text-muted); margin-bottom:6px;">기준 기간</div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <input class="select" type="date" value="2025-12-01" style="flex:1;">
+                <span>~</span>
+                <input class="select" type="date" value="2025-12-20" style="flex:1;">
+              </div>
+            </div>
+            <div style="font-size:18px; color:var(--c-text-muted);">vs</div>
+            <div style="padding:12px 14px; background:#F7FAFC; border-radius:6px;">
+              <div style="font-size:12px; color:var(--c-text-muted); margin-bottom:6px;">비교 기간</div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <input class="select" type="date" value="2024-12-01" style="flex:1;">
+                <span>~</span>
+                <input class="select" type="date" value="2024-12-20" style="flex:1;">
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:16px;">
+            <span style="font-size:12px; color:var(--c-text-muted); align-self:center;">빠른 선택:</span>
+            <button class="btn btn-sm">전년 동기</button>
+            <button class="btn btn-sm pro-only">전월 동기</button>
+            <button class="btn btn-sm">전주 동기</button>
+            <button class="btn btn-sm pro-only">커스텀</button>
+            <div style="flex:1"></div>
+            <select class="select"><option>전체 캠페인</option><option>매출 최적화만</option><option>수동만</option></select>
+            <button class="btn pro-only">CSV 내보내기 ↓</button>
+          </div>
+          <table class="area-table" id="compare-table"></table>
+          <div style="background:#F7FAFC; border-radius:6px; padding:16px; margin-top:16px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <div style="font-weight:600; font-size:13px;">지표 추이</div>
+              <div class="pro-only" style="display:flex; gap:4px;">
+                <button class="btn btn-sm" style="font-weight:600;">꺾은선</button>
+                <button class="btn btn-sm">막대</button>
+              </div>
+            </div>
+            <div style="height:180px; display:grid; place-items:center; color:var(--c-text-muted); font-size:12px; background:#FFF; border-radius:4px;">
+              차트 렌더 영역 · 기준(실선) / 비교(점선) · X축 동일 길이 정규화
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 변경 로그 & 롤백 -->
+      <div id="sub-logs" style="display:none;">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">변경 로그 &amp; 롤백</div>
+            <button class="btn">이벤트 기록 +</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <select class="select"><option>최근 7일 (간단)</option><option>최근 30일 (전문가)</option></select>
+            <select class="select"><option>전체 캠페인</option></select>
+            <select class="select"><option>🤖 자동</option><option>✍ 수동</option><option>📸 외부</option><option>전체 유형</option></select>
+          </div>
+          <table class="camp-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>캠페인</th>
+                <th>유형</th>
+                <th>변경 사항</th>
+                <th class="num">성과 비교</th>
+                <th>동작</th>
+              </tr>
+            </thead>
+            <tbody id="logs-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 노출시간 관리 -->
+      <div id="sub-schedule" style="display:none;">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">노출시간 관리</div>
+            <button class="btn-primary btn" onclick="showModal('SCHEDULE','선택 캠페인')">설정 저장</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:14px;">
+            <select class="select" style="width:200px;"><option>상품 선택 (0/15)</option></select>
+            <select class="select"><option>전체 유형</option><option>매출 최적화</option><option>수동</option></select>
+          </div>
+
+          <div style="font-weight:600; font-size:13px; margin-bottom:8px;">시간대 히트맵 (24h × 요일)</div>
+          <div id="heatmap" style="background:#F7FAFC; border-radius:6px; padding:12px; margin-bottom:20px; overflow-x:auto;"></div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div style="font-weight:600; font-size:13px; margin-bottom:8px;">비노출 구간 편집</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="chip chip-warning" style="padding:6px 10px; font-size:12px;">02:00 ~ 06:30 ✕</span>
+                <span class="chip chip-warning" style="padding:6px 10px; font-size:12px;">14:00 ~ 18:00 ✕</span>
+                <button class="btn btn-sm">+ 구간 추가</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight:600; font-size:13px; margin-bottom:8px;">조건 설정</div>
+              <div style="background:#F7FAFC; padding:12px; border-radius:6px; font-size:12px;">
+                <div style="margin-bottom:6px;"><b>매출 최적화</b> (AND)</div>
+                <div style="display:flex; gap:6px; margin-bottom:8px;">
+                  <label style="flex:1;">ROAS <input class="select" value="5000" style="width:70px;">%</label>
+                  <label style="flex:1;">예산 <input class="select" value="10000" style="width:80px;">원</label>
+                </div>
+                <div style="margin-bottom:6px;"><b>수동 성과형</b> (OR)</div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <label>CPC <input class="select" value="100" style="width:70px;">원</label>
+                  <label style="margin-left:12px;"><input type="radio" name="manual-action"> 광고 OFF</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pro-only" style="margin-top:20px; border-top:1px solid var(--c-border); padding-top:16px;">
+            <div style="font-weight:600; font-size:13px; margin-bottom:10px;">시간대별 예산 프로파일 <span style="font-size:11px; color:var(--c-warning); background:var(--c-warn-bg); padding:2px 6px; border-radius:3px; margin-left:6px;">쿠팡 day-parting API PoC 대기</span></div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <label><input type="radio" name="budget-profile"> 단일 예산</label>
+              <label style="margin-left:16px;"><input type="radio" name="budget-profile" checked> 구간별 예산</label>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <button class="btn btn-sm">🌙 새벽형</button>
+              <button class="btn btn-sm">🌞 피크형</button>
+              <button class="btn btn-sm">🌃 야간형</button>
+              <button class="btn btn-sm">⚙ 커스텀</button>
+            </div>
+            <table class="kw-table">
+              <thead><tr><th>구간</th><th>예산</th><th>용도</th></tr></thead>
+              <tbody>
+                <tr><td>00:00 ~ 07:00</td><td>2,000원</td><td style="text-align:left; color:var(--c-text-muted);">새벽 최소</td></tr>
+                <tr><td>07:00 ~ 09:00</td><td>5,000원</td><td style="text-align:left; color:var(--c-text-muted);">출근 피크</td></tr>
+                <tr><td>09:00 ~ 18:00</td><td>3,000원</td><td style="text-align:left; color:var(--c-text-muted);">낮 평상시</td></tr>
+                <tr><td>18:00 ~ 22:00</td><td>10,000원</td><td style="text-align:left; color:var(--c-text-muted);">저녁 피크</td></tr>
+                <tr><td>22:00 ~ 24:00</td><td style="color:var(--c-critical);">OFF</td><td style="text-align:left; color:var(--c-text-muted);">심야 중단</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 3) 규칙·알림 -->
+<!-- ============================================ -->
+<div class="page view" id="view-rules">
+  <div class="page-header">
+    <h1 class="page-title">규칙 설정 및 알림</h1>
+    <div class="page-tools">
+      <button class="btn-primary btn">전체 저장</button>
+    </div>
+  </div>
+  <div class="campaign-layout">
+    <div class="subtabs">
+      <div class="subtab active" data-rule-tab="builder">자동 규칙</div>
+      <div class="subtab" data-rule-tab="channels">알림 채널</div>
+      <div class="subtab" data-rule-tab="keywords">키워드 마스터 <span class="count" id="kw-count">-</span></div>
+    </div>
+    <div class="subtab-content">
+
+      <!-- 자동 규칙 빌더 -->
+      <div id="rule-sub-builder">
+        <div class="section">
+          <div class="section-title">매출 최적화 자동 조정 <span class="simple-only" style="font-size:11px; color:var(--c-text-muted); margin-left:8px;">(간단모드 · 프리셋)</span><span class="pro-only" style="font-size:11px; color:var(--c-text-muted); margin-left:8px;">(전문가 · AND/OR 빌더)</span></div>
+
+          <!-- 간단모드: 프리셋 체크박스 -->
+          <div class="simple-only" style="margin-top:14px;">
+            <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+              <input type="checkbox" checked> ROAS 기준 이상 → 예산 ↑ / 목표ROAS ↓
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+              <input type="checkbox" checked> 매출 높음 + ROAS 낮음 → 예산 ↑ / 목표ROAS ↑
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+              <input type="checkbox"> 매출·ROAS 모두 낮음 → 예산 ↓ / 목표ROAS ↑
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+              <input type="checkbox"> 전환율 높음 + CPC 낮음 → 예산 ↑ / 목표ROAS ↑
+            </label>
+            <a class="btn-link" id="rules-show-all">그 외 12가지 규칙 자세히 보기 →</a>
+            <div id="rules-all-list" style="display:none; margin-top:10px; background:#F7FAFC; padding:12px 14px; border-radius:6px;"></div>
+          </div>
+
+          <!-- 전문가모드: AND/OR 빌더 -->
+          <div class="pro-only" style="margin-top:14px;">
+            <div style="border:1px solid var(--c-border); border-radius:6px; padding:14px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="font-weight:600;">규칙 1 <span style="font-size:11px; color:var(--c-primary); background:var(--c-primary-light); padding:2px 6px; border-radius:3px; margin-left:4px;">AND 그룹</span></div>
+                <div><button class="btn btn-sm">복제</button> <button class="btn btn-sm">삭제</button></div>
+              </div>
+              <div style="background:#F7FAFC; padding:10px; border-radius:4px; font-size:12px;">
+                <div style="margin-bottom:6px;">IF  <select class="select"><option>광고매출</option></select> <select class="select"><option>이전 7일</option></select> <select class="select"><option>10% 감소</option></select></div>
+                <div style="margin-bottom:6px;">AND <select class="select"><option>ROAS</option></select> <select class="select"><option>이전 7일</option></select> <select class="select"><option>5% 감소</option></select></div>
+                <div style="margin-bottom:6px;">AND <select class="select"><option>전환율</option></select> <select class="select"><option>이전 7일</option></select> <select class="select"><option>10% 증가</option></select></div>
+                <button class="btn btn-sm">+ AND 조건 추가</button>
+              </div>
+              <div style="margin-top:10px;">
+                <div style="font-weight:600; font-size:12px; margin-bottom:4px;">THEN</div>
+                <label style="display:block; padding:2px 0;"><input type="checkbox" checked> 알림 보내기</label>
+                <label style="display:block; padding:2px 0;"><input type="checkbox"> 요약 보고서 생성</label>
+                <label style="display:block; padding:2px 0;"><input type="radio" name="exec1"> 자동 실행 — 현재 OFF</label>
+              </div>
+            </div>
+            <button class="btn">+ AND 규칙 추가</button>
+            <button class="btn">+ OR 규칙 추가</button>
+          </div>
+
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--c-border);">
+            <div style="font-weight:600; margin-bottom:10px;">기준값 자동 설정</div>
+            <div style="color:var(--c-text-muted); font-size:13px;">최근 30일 데이터의 +2%를 기준점으로 사용. 최근 30일 평균 ROAS <b style="color:var(--c-text);">285%</b> 기준.</div>
+          </div>
+
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--c-border);">
+            <div style="font-weight:600; margin-bottom:10px;">실행 방식</div>
+            <label style="display:flex;gap:8px;padding:4px 0;"><input type="radio" name="exec"> 추천만 (알림·대시보드)</label>
+            <label style="display:flex;gap:8px;padding:4px 0;"><input type="radio" name="exec" checked> 확인 후 실행 (기본)</label>
+            <label style="display:flex;gap:8px;padding:4px 0;"><input type="radio" name="exec" id="auto-exec-radio"> 자동 실행 <span style="color:var(--c-text-muted); font-size:12px;">(비밀번호 확인 필요)</span></label>
+          </div>
+
+          <div class="pro-only" style="margin-top:16px; background:#F7FAFC; border-radius:6px; padding:14px;">
+            <div style="font-weight:600; margin-bottom:8px;">자동 롤백 트리거</div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px;">
+              <span>매출이</span>
+              <select class="select"><option>14일 대비 -30% 이상</option></select>
+              <span>감소 시</span>
+              <select class="select"><option>최근 자동 변경만</option><option>최근 모든 변경</option></select>
+              <span>을</span>
+              <select class="select"><option>3단계</option><option>1단계</option></select>
+              <span>롤백 · 24시간 쿨다운</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 알림 채널 -->
+      <div id="rule-sub-channels" style="display:none;">
+        <div class="section">
+          <div class="section-title">알림 채널</div>
+          <div style="margin-top:16px;">
+            <div style="font-weight:600; margin-bottom:6px;">이메일</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <label><input type="checkbox" checked> 사용</label>
+              <input class="select" type="email" value="edi.sharework@gmail.com" style="flex:1; max-width:320px;">
+              <button class="btn">테스트 발송</button>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-weight:600; margin-bottom:6px;">카카오톡 알림톡 <span style="font-size:11px; color:var(--c-warning); background:var(--c-warn-bg); padding:2px 6px; border-radius:3px; margin-left:6px;">V1 준비 중</span></div>
+            <div style="display:flex; gap:8px; align-items:center; opacity:0.6; pointer-events:none;">
+              <label><input type="checkbox" disabled> 사용</label>
+              <input class="select" placeholder="010-____-____" style="flex:1; max-width:200px;" disabled>
+              <button class="btn" disabled>인증</button>
+            </div>
+            <div style="color:var(--c-text-muted); font-size:12px; margin-top:4px;">발송 템플릿: "ADMIZER 알림 - {캠페인} {지표} {변동}"</div>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-weight:600; margin-bottom:6px;">앱 내 알림 벨</div>
+            <label><input type="checkbox" checked disabled> 항상 ON (해제 불가)</label>
+          </div>
+
+          <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--c-border);">
+            <div style="font-weight:600; margin-bottom:10px;">발송 조건</div>
+            <div style="color:var(--c-text-muted); font-size:12px; margin-bottom:6px;">실시간 알림 (규칙 매칭 즉시)</div>
+            <label style="display:block; padding:3px 0;"><input type="checkbox" checked> 예산 소진 임박 (한 시간마다 체크)</label>
+            <label style="display:block; padding:3px 0;"><input type="checkbox" checked> ROAS 하락 (기준 -20% 초과)</label>
+            <label style="display:block; padding:3px 0;"><input type="checkbox" checked> 아이템위너 이탈</label>
+            <label style="display:block; padding:3px 0;"><input type="checkbox" checked> 품절</label>
+            <div style="color:var(--c-text-muted); font-size:12px; margin:10px 0 6px;">일일 요약</div>
+            <label style="display:flex; gap:8px; align-items:center; padding:3px 0;"><input type="checkbox" checked> 매일 <select class="select" style="width:100px;"><option>09:00</option><option>18:00</option></select> 전일 요약 발송</label>
+          </div>
+
+          <div class="pro-only" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--c-border);">
+            <div style="font-weight:600; margin-bottom:10px;">방해 금지</div>
+            <label style="display:flex; gap:8px; align-items:center;"><input type="radio" name="dnd"> 22:00 ~ 08:00 은 일일 요약 시간으로 지연</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 키워드 마스터 -->
+      <div id="rule-sub-keywords" style="display:none;">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">키워드 마스터</div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-sm" data-kw-type="all">전체</button>
+              <button class="btn btn-sm" data-kw-type="보호">보호</button>
+              <button class="btn btn-sm" data-kw-type="필수">필수</button>
+              <button class="btn btn-sm" data-kw-type="제외">제외</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <select class="select"><option>전체 캠페인</option></select>
+            <input class="select" placeholder="키워드 검색..." style="flex:1; max-width:260px;">
+            <div style="flex:1"></div>
+            <button class="btn">CSV ↓</button>
+            <button class="btn">CSV ↑</button>
+            <button class="btn-primary btn">+ 키워드 추가</button>
+          </div>
+          <table class="camp-table">
+            <thead>
+              <tr>
+                <th style="width:32px"><input type="checkbox"></th>
+                <th>키워드</th>
+                <th>유형</th>
+                <th>캠페인</th>
+                <th>추가일</th>
+                <th>출처</th>
+                <th class="pro-only">검색량</th>
+                <th>동작</th>
+              </tr>
+            </thead>
+            <tbody id="kw-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 4) 인사이트 -->
+<!-- ============================================ -->
+<div class="page view" id="view-insights">
+  <div class="page-header">
+    <h1 class="page-title">애드마이저 인사이트</h1>
+    <div class="page-tools">
+      <select class="select"><option>최근 7일</option><option>최근 14일</option><option>최근 30일</option></select>
+      <button class="btn">🔄 재생성</button>
+    </div>
+  </div>
+  <div class="campaign-layout">
+    <div class="subtabs">
+      <div class="subtab active" data-ins-tab="today">오늘 리포트 <span class="count" id="ins-today-count">-</span></div>
+      <div class="subtab" data-ins-tab="scenarios">시나리오 북 <span class="count">21</span></div>
+      <div class="subtab" data-ins-tab="learn">학습 자료 <span class="count">4</span></div>
+    </div>
+    <div class="subtab-content">
+
+      <!-- 오늘 리포트 -->
+      <div id="ins-sub-today">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">오늘의 진단 리포트</div>
+            <div style="color:var(--c-text-muted); font-size:12px;">생성: <span id="ins-generated-at">2026-04-21</span> · LLM 캐시 30분</div>
+          </div>
+          <div id="insight-full-list"></div>
+        </div>
+      </div>
+
+      <!-- 시나리오 북 21 케이스 -->
+      <div id="ins-sub-scenarios" style="display:none;">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">전략 시나리오 북 <span style="font-size:12px; color:var(--c-text-muted); font-weight:400; margin-left:4px;">(21 케이스)</span></div>
+            <div class="pro-only" style="display:flex; gap:6px;">
+              <select class="select"><option>전체 유형</option><option>profitability</option><option>traffic_quality</option><option>reach</option><option>budget</option><option>cost</option><option>external</option></select>
+              <input class="select" placeholder="케이스 검색..." style="width:180px;">
+            </div>
+          </div>
+          <div id="scenarios-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px;"></div>
+        </div>
+      </div>
+
+      <!-- 학습 자료 4편 -->
+      <div id="ins-sub-learn" style="display:none;">
+        <div class="section">
+          <div class="section-title">학습 자료</div>
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px; margin-top:16px;">
+            <div class="insight-card" style="padding:18px 20px;">
+              <div style="font-size:22px;">📘</div>
+              <div style="font-weight:700; margin:8px 0 4px; font-size:15px;">기초 용어편</div>
+              <div style="color:var(--c-text-muted); font-size:13px; margin-bottom:6px;">ROAS, CPC, CVR 등 광고 관리의 기초 용어</div>
+              <div style="font-size:11px; color:var(--c-text-muted); margin-bottom:10px;">15분 읽기 · 진행도 <b style="color:var(--c-success);">완독</b></div>
+              <button class="btn-primary btn">다시 읽기 →</button>
+            </div>
+            <div class="insight-card" style="padding:18px 20px;">
+              <div style="font-size:22px;">📗</div>
+              <div style="font-weight:700; margin:8px 0 4px; font-size:15px;">애드마이저 기초</div>
+              <div style="color:var(--c-text-muted); font-size:13px; margin-bottom:6px;">처음 시작하는 사용자를 위한 핵심 기능 안내</div>
+              <div style="font-size:11px; color:var(--c-text-muted); margin-bottom:10px;">30분 읽기 · 진행도 <b style="color:var(--c-warning);">50%</b></div>
+              <button class="btn-primary btn">이어 읽기 →</button>
+            </div>
+            <div class="insight-card" style="padding:18px 20px;">
+              <div style="font-size:22px;">📙</div>
+              <div style="font-weight:700; margin:8px 0 4px; font-size:15px;">애드마이저 심화</div>
+              <div style="color:var(--c-text-muted); font-size:13px; margin-bottom:6px;">AND/OR 규칙 실전 · 자동 롤백 전략</div>
+              <div style="font-size:11px; color:var(--c-text-muted); margin-bottom:10px;">45분 읽기 · 진행도 <b style="color:var(--c-text-muted);">미시작</b></div>
+              <button class="btn">읽기 →</button>
+            </div>
+            <div class="insight-card" style="padding:18px 20px;">
+              <div style="font-size:22px;">📕</div>
+              <div style="font-weight:700; margin:8px 0 4px; font-size:15px;">상품 관리편</div>
+              <div style="color:var(--c-text-muted); font-size:13px; margin-bottom:6px;">광고 인사이트를 활용한 의사결정 및 상품 관리</div>
+              <div style="font-size:11px; color:var(--c-text-muted); margin-bottom:10px;">60분 읽기 · 진행도 <b style="color:var(--c-text-muted);">미시작</b></div>
+              <button class="btn">읽기 →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- === 변경 미리보기 모달 === -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head" id="modal-title">변경 미리보기</div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn-primary btn" onclick="closeModal(); alert('프로토타입이므로 실제 호출 없음. 실제 구현 시 쿠팡 API 호출.')">확인 · 적용</button>
+    </div>
+  </div>
+</div>
+
+<div class="demo-notice">프로토타입 · 실제 쿠팡 데이터 기반</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

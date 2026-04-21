@@ -1,0 +1,5830 @@
+<!--
+  ADMIZER V1 UI Prototype — Single-File Bundle
+  생성: 2026-04-21
+  데이터: coupang_adreport.xlsx (1,900행) + coupang gross sales.xlsx
+  
+  * 이 파일은 CSS·JS·데이터 전부 인라인. 더블클릭만으로 브라우저에서 바로 실행됨.
+  * 외부 연결 없음 — 오프라인 공유·이메일 첨부 가능.
+-->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>ADMIZER V1 — UI 프로토타입</title>
+<meta name="viewport" content="width=1280">
+<style>
+  :root {
+    --c-bg: #F4F6FA;
+    --c-card: #FFFFFF;
+    --c-border: #E2E8F0;
+    --c-text: #1A202C;
+    --c-text-muted: #718096;
+    --c-primary: #1E2761;
+    --c-primary-light: #CADCFC;
+    --c-critical: #D9534F;
+    --c-warning: #F0AD4E;
+    --c-info: #5CB85C;
+    --c-success: #38A169;
+    --c-danger-bg: #FEF2F2;
+    --c-warn-bg: #FFFBEB;
+    --c-info-bg: #F0FDF4;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+         font-size: 14px; color: var(--c-text); background: var(--c-bg); line-height: 1.5; }
+
+  /* === 글로벌 헤더 === */
+  .gnb { background: var(--c-primary); color: #fff; padding: 0 24px; height: 56px;
+         display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .gnb-left { display: flex; align-items: center; gap: 32px; }
+  .gnb-logo { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+  .gnb-nav { display: flex; gap: 4px; }
+  .gnb-nav a { color: rgba(255,255,255,0.72); text-decoration: none; padding: 8px 14px;
+               border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; }
+  .gnb-nav a.active { color: #fff; background: rgba(255,255,255,0.14); }
+  .gnb-nav a:hover { color: #fff; }
+  .gnb-right { display: flex; align-items: center; gap: 12px; }
+  .mode-toggle { display: flex; background: rgba(255,255,255,0.12); border-radius: 20px; padding: 3px; }
+  .mode-toggle button { background: transparent; border: 0; padding: 5px 14px; border-radius: 16px;
+                       color: rgba(255,255,255,0.72); cursor: pointer; font-size: 12px; font-weight: 600; }
+  .mode-toggle button.active { background: #fff; color: var(--c-primary); }
+  .icon-btn { background: transparent; border: 0; color: #fff; cursor: pointer; font-size: 18px;
+              padding: 6px; border-radius: 6px; position: relative; }
+  .icon-btn:hover { background: rgba(255,255,255,0.14); }
+  .badge-dot { position: absolute; top: 4px; right: 4px; background: var(--c-critical);
+               width: 16px; height: 16px; border-radius: 10px; font-size: 10px; color: #fff;
+               display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  /* === 페이지 레이아웃 === */
+  .page { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .page-tools { display: flex; gap: 8px; align-items: center; }
+
+  /* === 공용 컨트롤 === */
+  .btn { background: #fff; border: 1px solid var(--c-border); padding: 6px 12px; border-radius: 6px;
+         font-size: 13px; cursor: pointer; color: var(--c-text); font-weight: 500; }
+  .btn:hover { background: var(--c-bg); }
+  .btn-primary { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
+  .btn-primary:hover { background: #151C47; }
+  .select { background: #fff; border: 1px solid var(--c-border); padding: 6px 10px; border-radius: 6px;
+            font-size: 13px; cursor: pointer; color: var(--c-text); }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px;
+          font-size: 11px; font-weight: 600; letter-spacing: 0.2px; }
+  .chip-critical { background: var(--c-danger-bg); color: var(--c-critical); }
+  .chip-warning { background: var(--c-warn-bg); color: #B45309; }
+  .chip-info { background: var(--c-info-bg); color: var(--c-success); }
+  .chip-type { background: var(--c-primary-light); color: var(--c-primary); }
+
+  /* === KPI 띠 === */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .kpi { background: var(--c-card); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+  .kpi-label { font-size: 12px; color: var(--c-text-muted); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .kpi-tooltip { display: inline-block; margin-left: 4px; cursor: help; color: var(--c-text-muted); font-size: 11px; }
+  .kpi-value { font-size: 26px; font-weight: 800; margin-top: 8px; font-family: -apple-system, "SF Pro Display", sans-serif; }
+  .kpi-delta { font-size: 12px; margin-top: 4px; color: var(--c-text-muted); }
+  .kpi-delta.up { color: var(--c-success); }
+  .kpi-delta.down { color: var(--c-critical); }
+  .kpi-bar { background: var(--c-border); height: 4px; border-radius: 4px; margin-top: 10px; position: relative; overflow: hidden; }
+  .kpi-bar-fill { background: var(--c-primary); height: 100%; border-radius: 4px; }
+  .kpi-bar-fill.kpi-bar-normal { background: var(--c-success); }
+  .kpi-bar-fill.kpi-bar-warn { background: var(--c-warning); }
+  .kpi-bar-fill.kpi-bar-bad { background: var(--c-critical); }
+
+  /* === 인사이트 카드 === */
+  .section { background: var(--c-card); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 700; }
+  .section-link { color: var(--c-primary); text-decoration: none; font-size: 13px; font-weight: 500; }
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .insight-card { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px 16px; background: #FAFBFC; }
+  .insight-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .insight-title { font-weight: 700; font-size: 14px; }
+  .insight-body { font-size: 13px; color: var(--c-text); line-height: 1.55; margin-bottom: 10px; }
+  .insight-target { font-size: 12px; color: var(--c-text-muted); margin-bottom: 10px; }
+  .insight-actions { display: flex; gap: 6px; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-link { background: transparent; border: 0; color: var(--c-primary); font-weight: 500; cursor: pointer; padding: 4px 6px; font-size: 12px; }
+
+  /* === 순위 그리드 === */
+  .rank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .rank-card { background: var(--c-card); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+  .rank-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .rank-title { font-size: 13px; font-weight: 700; color: var(--c-text); }
+  .rank-icon { font-size: 16px; }
+  .rank-list { list-style: none; }
+  .rank-list li { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed var(--c-border); }
+  .rank-list li:last-child { border-bottom: 0; }
+  .rank-list .rank-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
+  .rank-list .rank-value { font-weight: 700; color: var(--c-primary); font-variant-numeric: tabular-nums; }
+  .rank-list .rank-value.bad { color: var(--c-critical); }
+  .rank-more { text-align: right; margin-top: 8px; font-size: 12px; }
+  .rank-more a { color: var(--c-primary); text-decoration: none; }
+  .rank-empty { color: var(--c-text-muted); font-size: 13px; padding: 6px 0; }
+
+  /* === 캠페인 페이지 === */
+  .campaign-layout { display: grid; grid-template-columns: 180px 1fr; gap: 20px; }
+  .subtabs { display: flex; flex-direction: column; gap: 4px; }
+  .subtab { padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+            display: flex; justify-content: space-between; align-items: center; }
+  .subtab.active { background: var(--c-primary); color: #fff; }
+  .subtab .count { background: rgba(255,255,255,0.25); color: inherit; font-size: 11px; padding: 2px 7px; border-radius: 10px; }
+  .subtab:not(.active) .count { background: var(--c-border); color: var(--c-text-muted); }
+
+  .table-wrap { background: var(--c-card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .table-toolbar { padding: 12px 16px; border-bottom: 1px solid var(--c-border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  table.camp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .camp-table th { background: #F7FAFC; font-weight: 600; text-align: left; padding: 10px 12px; color: var(--c-text-muted);
+                   font-size: 12px; border-bottom: 1px solid var(--c-border); position: sticky; top: 0; }
+  .camp-table td { padding: 10px 12px; border-bottom: 1px solid #EDF2F7; vertical-align: middle; }
+  .camp-table tr:hover { background: #FAFBFC; cursor: pointer; }
+  .camp-table tr.selected { background: #EEF4FF; }
+  .camp-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .camp-table .camp-name { font-weight: 500; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .status-dot { display: inline-block; width: 6px; height: 6px; background: var(--c-success); border-radius: 4px; margin-right: 6px; }
+
+  /* === 진단 패널 === */
+  .diagnose { background: var(--c-card); border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 16px; padding: 24px; }
+  .diagnose-head { border-bottom: 1px solid var(--c-border); padding-bottom: 14px; margin-bottom: 16px; }
+  .diagnose-head h3 { font-size: 16px; margin-bottom: 6px; }
+  .diagnose-meta { font-size: 12px; color: var(--c-text-muted); }
+  .area-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 14px 0; }
+  .area-table th { background: #F7FAFC; padding: 8px 10px; font-weight: 600; color: var(--c-text-muted); font-size: 11px; text-align: right; border-bottom: 1px solid var(--c-border); }
+  .area-table th:first-child { text-align: left; }
+  .area-table td { padding: 10px; font-variant-numeric: tabular-nums; text-align: right; border-bottom: 1px solid #EDF2F7; }
+  .area-table td:first-child { text-align: left; font-weight: 600; }
+  .summary { background: #F9FAFB; border-left: 3px solid var(--c-primary); padding: 12px 14px; border-radius: 4px; font-size: 13px; margin: 12px 0; }
+  .action-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+  .action-card { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px; background: #FFF; }
+  .action-card h4 { font-size: 13px; margin-bottom: 6px; }
+  .action-card .count { font-size: 22px; font-weight: 800; color: var(--c-primary); margin: 4px 0 10px; font-variant-numeric: tabular-nums; }
+  .action-card .radio-group { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
+  .action-card .radio-group label { font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .action-card button { width: 100%; padding: 6px 0; font-size: 12px; }
+
+  /* 키워드 표 */
+  .kw-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+  .kw-table th { background: #F7FAFC; padding: 6px 8px; font-weight: 600; color: var(--c-text-muted); font-size: 11px; text-align: right; }
+  .kw-table th:first-child { text-align: left; }
+  .kw-table td { padding: 6px 8px; font-variant-numeric: tabular-nums; text-align: right; border-bottom: 1px solid #EDF2F7; }
+  .kw-table td:first-child { text-align: left; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* === V2 스텁 === */
+  .v2-stub { background: #F7FAFC; border: 1px dashed var(--c-border); border-radius: var(--radius); padding: 14px 16px; margin-top: 14px; color: var(--c-text-muted); font-size: 13px; }
+  .v2-stub h4 { font-size: 13px; color: var(--c-text); margin-bottom: 4px; }
+  .v2-stub .v2-tag { background: var(--c-warn-bg); color: #B45309; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; font-weight: 700; }
+
+  /* === 간단/전문가 모드 숨김 === */
+  body.mode-simple .pro-only { display: none !important; }
+  body.mode-pro .simple-only { display: none !important; }
+
+  /* === 탭 뷰 전환 === */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* === 숫자 컬러 === */
+  .good { color: var(--c-success); }
+  .bad { color: var(--c-critical); }
+  .neutral { color: var(--c-text-muted); }
+
+  /* === 작은 그래프 (sparkline) === */
+  .bar-mini { display: inline-block; height: 4px; background: var(--c-border); border-radius: 2px; vertical-align: middle; margin-left: 4px; position: relative; width: 60px; }
+  .bar-mini-fill { height: 100%; background: var(--c-primary); border-radius: 2px; }
+
+  /* === 알림 벨 팝오버 === */
+  .bell-popover { position: absolute; top: 48px; right: 24px; width: 340px; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 200; display: none; }
+  .bell-popover.open { display: block; }
+  .bell-head { padding: 12px 16px; border-bottom: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
+  .bell-list { max-height: 380px; overflow-y: auto; }
+  .bell-item { padding: 10px 16px; border-bottom: 1px solid #EDF2F7; font-size: 13px; cursor: pointer; }
+  .bell-item:hover { background: #FAFBFC; }
+  .bell-item .bell-ts { color: var(--c-text-muted); font-size: 11px; margin-top: 2px; }
+  .bell-foot { padding: 10px 16px; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; font-size: 12px; }
+  .bell-foot a { color: var(--c-primary); text-decoration: none; }
+
+  /* === 모달 === */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; display: none; align-items: center; justify-content: center; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: #fff; border-radius: var(--radius); width: 480px; max-width: 90vw; }
+  .modal-head { padding: 16px 20px; border-bottom: 1px solid var(--c-border); font-weight: 700; font-size: 15px; }
+  .modal-body { padding: 20px; font-size: 13px; }
+  .modal-body .compare { background: #F7FAFC; border-radius: 6px; padding: 12px; margin: 12px 0; font-variant-numeric: tabular-nums; }
+  .modal-body .notice { color: #B45309; background: var(--c-warn-bg); padding: 8px 12px; border-radius: 4px; font-size: 12px; margin: 10px 0; }
+  .modal-foot { padding: 12px 20px; border-top: 1px solid var(--c-border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* === 푸터 데모 안내 === */
+  .demo-notice { position: fixed; bottom: 16px; right: 16px; background: var(--c-primary); color: #fff;
+                 padding: 8px 14px; font-size: 12px; border-radius: 20px; z-index: 50; opacity: 0.9; }
+</style>
+</head>
+<body class="mode-simple">
+
+<!-- === GNB === -->
+<div class="gnb">
+  <div class="gnb-left">
+    <div class="gnb-logo">ADMIZER</div>
+    <nav class="gnb-nav">
+      <a data-view="dashboard" class="active">통합분석 대시보드</a>
+      <a data-view="campaigns">캠페인 분석·관리</a>
+      <a data-view="rules">규칙·알림</a>
+      <a data-view="insights">인사이트</a>
+    </nav>
+  </div>
+  <div class="gnb-right">
+    <div class="mode-toggle">
+      <button data-mode="simple" class="active">간단</button>
+      <button data-mode="pro">전문가</button>
+    </div>
+    <button class="icon-btn" id="bell-btn" title="알림">
+      🔔 <span class="badge-dot" id="bell-count">-</span>
+    </button>
+    <button class="icon-btn" title="설정">⚙</button>
+    <button class="icon-btn" title="계정">👤</button>
+  </div>
+</div>
+
+<!-- 알림 벨 팝오버 -->
+<div class="bell-popover" id="bell-popover">
+  <div class="bell-head">
+    <span>알림 (<span id="bell-count-text">-</span>)</span>
+    <button class="btn-link">모두 읽음</button>
+  </div>
+  <div class="bell-list" id="bell-list"></div>
+  <div class="bell-foot">
+    <a>알림 설정 →</a>
+    <a>전체 보기 →</a>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 1) 대시보드 -->
+<!-- ============================================ -->
+<div class="page view active" id="view-dashboard">
+  <div class="page-header">
+    <h1 class="page-title">통합분석 대시보드</h1>
+    <div class="page-tools">
+      <select class="select"><option>최근 7일</option><option>14일</option><option>30일</option></select>
+      <select class="select"><option>vs 전주</option><option>vs 전월</option><option>vs 전년</option></select>
+      <button class="btn">🔄 새로고침</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-strip" id="kpi-strip"></div>
+
+  <!-- 인사이트 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">ADMIZER 인사이트</div>
+      <a class="section-link" data-view="insights">더보기 (<span id="insight-total-count">-</span>) →</a>
+    </div>
+    <div class="insight-grid" id="insight-grid"></div>
+  </div>
+
+  <!-- 순위 그리드 -->
+  <div class="rank-grid" id="rank-grid"></div>
+</div>
+
+<!-- ============================================ -->
+<!-- 2) 캠페인 분석·관리 -->
+<!-- ============================================ -->
+<div class="page view" id="view-campaigns">
+  <div class="page-header">
+    <h1 class="page-title">광고캠페인 분석·관리</h1>
+    <div class="page-tools">
+      <button class="btn">🔄 새로고침</button>
+    </div>
+  </div>
+
+  <div class="campaign-layout">
+    <div class="subtabs">
+      <div class="subtab active" data-subtab="diagnose">진단 <span class="count" id="tab-diagnose-count">-</span></div>
+      <div class="subtab" data-subtab="compare">기간 비교</div>
+      <div class="subtab" data-subtab="logs">변경 로그 <span class="count">0</span></div>
+      <div class="subtab" data-subtab="schedule">노출시간 <span class="count">0</span></div>
+    </div>
+
+    <div class="subtab-content">
+      <!-- 진단 -->
+      <div id="sub-diagnose">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <select class="select"><option>전체 유형</option><option>매출 최적화</option><option>수동 성과형</option></select>
+            <input class="select" placeholder="캠페인 검색..." style="flex:1; max-width: 260px;">
+            <select class="select"><option>광고비 ↓</option><option>ROAS ↑</option><option>ROAS ↓</option><option>매출 ↓</option></select>
+            <div style="flex:1"></div>
+            <button class="btn pro-only">필드 설정 [+]</button>
+          </div>
+          <table class="camp-table" id="camp-table">
+            <thead>
+              <tr>
+                <th style="width:32px"><input type="checkbox"></th>
+                <th>캠페인</th>
+                <th>유형</th>
+                <th class="num">매출</th>
+                <th class="num">광고비</th>
+                <th class="num">ROAS</th>
+                <th class="num">전환율</th>
+                <th class="num pro-only">CPC</th>
+                <th class="num pro-only">노출수</th>
+                <th class="num pro-only">클릭률</th>
+                <th class="num pro-only">판매수량</th>
+              </tr>
+            </thead>
+            <tbody id="camp-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- 진단 패널 -->
+        <div class="diagnose" id="diagnose-panel" style="display:none;"></div>
+      </div>
+
+      <!-- 기간 비교 -->
+      <div id="sub-compare" style="display:none;">
+        <div class="section">
+          <div class="section-title">기간 비교 분석</div>
+          <p style="color:var(--c-text-muted); margin-top:8px;">※ 이 프로토타입은 실 데이터 1개 스냅샷만 포함. 기간 비교는 DB 연동 후 활성화.</p>
+        </div>
+      </div>
+
+      <!-- 로그 -->
+      <div id="sub-logs" style="display:none;">
+        <div class="section">
+          <div class="section-title">변경 로그 &amp; 롤백</div>
+          <p style="color:var(--c-text-muted); margin-top:8px;">※ 프로토타입에서는 변경 이력이 없습니다. DB 연동 후 자동 기록됩니다.</p>
+        </div>
+      </div>
+
+      <!-- 노출시간 -->
+      <div id="sub-schedule" style="display:none;">
+        <div class="section">
+          <div class="section-title">노출시간 관리</div>
+          <p style="color:var(--c-text-muted); margin-top:8px;">※ 24시간 히트맵 + 시간대별 예산 프로파일 UI. 쿠팡 API PoC 후 활성화.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 3) 규칙·알림 -->
+<!-- ============================================ -->
+<div class="page view" id="view-rules">
+  <div class="page-header"><h1 class="page-title">규칙 설정 및 알림</h1></div>
+  <div class="section">
+    <div class="section-title">매출 최적화 자동 조정 (간단모드 프리셋)</div>
+    <div style="margin-top:14px;">
+      <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+        <input type="checkbox" checked> ROAS 기준 이상 → 예산 ↑ / 목표ROAS ↓
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+        <input type="checkbox" checked> 매출 높음 + ROAS 낮음 → 예산 ↑ / 목표ROAS ↑
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+        <input type="checkbox"> 매출·ROAS 모두 낮음 → 예산 ↓ / 목표ROAS ↑
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+        <input type="checkbox"> 전환율 높음 + CPC 낮음 → 예산 ↑ / 목표ROAS ↑
+      </label>
+      <a class="btn-link">그 외 12가지 규칙 자세히 보기 →</a>
+    </div>
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--c-border);">
+      <div style="font-weight:700; margin-bottom:10px;">실행 방식</div>
+      <label style="display:flex;gap:8px;padding:4px 0;"><input type="radio" name="exec"> 추천만 (알림·대시보드)</label>
+      <label style="display:flex;gap:8px;padding:4px 0;"><input type="radio" name="exec" checked> 확인 후 실행 (기본)</label>
+      <label style="display:flex;gap:8px;padding:4px 0;"><input type="radio" name="exec"> 자동 실행 (비밀번호 확인 필요)</label>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 4) 인사이트 -->
+<!-- ============================================ -->
+<div class="page view" id="view-insights">
+  <div class="page-header"><h1 class="page-title">애드마이저 인사이트</h1></div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">오늘의 진단 리포트</div>
+      <div style="color:var(--c-text-muted); font-size:12px;">생성: 2026-04-21</div>
+    </div>
+    <div id="insight-full-list"></div>
+  </div>
+</div>
+
+<!-- === 변경 미리보기 모달 === -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head" id="modal-title">변경 미리보기</div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn-primary btn" onclick="closeModal(); alert('프로토타입이므로 실제 호출 없음. 실제 구현 시 쿠팡 API 호출.')">확인 · 적용</button>
+    </div>
+  </div>
+</div>
+
+<div class="demo-notice">프로토타입 · 실제 쿠팡 데이터 기반</div>
+
+<script>
+window.ADMIZER_DATA = {
+  "all_total": {
+    "impressions": 16267531.0,
+    "clicks": 24892.0,
+    "spend": 9245315.0,
+    "orders": 517.0,
+    "qty": 536.0,
+    "revenue": 32074540.0,
+    "ctr": 0.0015301645959672676,
+    "cvr": 0.020769725212919813,
+    "cpc": 371.417121966897,
+    "cpa": 17882.62088974855,
+    "roas": 3.4692749787324715
+  },
+  "campaigns": [
+    {
+      "id": 104148787,
+      "name": "볼펜녹음기 VR-900 매출최적화 25/08/28 12.23 430%",
+      "short_name": "볼펜녹음기 VR-900 매출최적화 25/08/28 12.23 430%",
+      "type": "매출 최적화",
+      "product": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인,{\"옵션\":\"볼펜녹음기 단품\"},{\"옵션\":\"볼펜녹음",
+      "start_date": "2025.08.28",
+      "areas": {
+        "비검색": {
+          "impressions": 1177626.0,
+          "clicks": 2979.0,
+          "spend": 1431441.0,
+          "orders": 56.0,
+          "qty": 56.0,
+          "revenue": 4041000.0,
+          "ctr": 0.0025296656153991166,
+          "cvr": 0.018798254447801276,
+          "cpc": 480.5105740181269,
+          "cpa": 25561.446428571428,
+          "roas": 2.823029380882621
+        },
+        "검색": {
+          "impressions": 36695.0,
+          "clicks": 913.0,
+          "spend": 1657638.0,
+          "orders": 90.0,
+          "qty": 93.0,
+          "revenue": 6514170.0,
+          "ctr": 0.02488077394740428,
+          "cvr": 0.09857612267250822,
+          "cpc": 1815.5947426067908,
+          "cpa": 18418.2,
+          "roas": 3.9297904608847047
+        }
+      },
+      "total": {
+        "impressions": 1214321.0,
+        "clicks": 3892.0,
+        "spend": 3089079.0,
+        "orders": 146.0,
+        "qty": 149.0,
+        "revenue": 10555170.0,
+        "ctr": 0.003205083334637217,
+        "cvr": 0.03751284686536485,
+        "cpc": 793.6996402877697,
+        "cpa": 21158.075342465752,
+        "roas": 3.416931065861378
+      },
+      "keywords": [
+        {
+          "keyword": "녹음기",
+          "area": "검색",
+          "impressions": 13906.0,
+          "clicks": 239.0,
+          "spend": 440221.0,
+          "orders": 25.0,
+          "revenue": 1725000.0,
+          "ctr": 0.017186825830576728,
+          "cvr": 0.10460251046025104,
+          "cpc": 1841.928870292887,
+          "cpa": 17608.84,
+          "roas": 3.9184863966053416
+        },
+        {
+          "keyword": "초소형 녹음기",
+          "area": "검색",
+          "impressions": 6239.0,
+          "clicks": 145.0,
+          "spend": 347859.0,
+          "orders": 9.0,
+          "revenue": 621000.0,
+          "ctr": 0.023240903991024204,
+          "cvr": 0.06206896551724138,
+          "cpc": 2399.0275862068966,
+          "cpa": 38651.0,
+          "roas": 1.785206074875165
+        },
+        {
+          "keyword": "장시간 녹음기1위",
+          "area": "검색",
+          "impressions": 1765.0,
+          "clicks": 72.0,
+          "spend": 123745.0,
+          "orders": 7.0,
+          "revenue": 483000.0,
+          "ctr": 0.040793201133144476,
+          "cvr": 0.09722222222222222,
+          "cpc": 1718.6805555555557,
+          "cpa": 17677.85714285714,
+          "roas": 3.9031880075962664
+        },
+        {
+          "keyword": "휴대용 녹음기",
+          "area": "검색",
+          "impressions": 2383.0,
+          "clicks": 41.0,
+          "spend": 65144.0,
+          "orders": 6.0,
+          "revenue": 414000.0,
+          "ctr": 0.017205203524968526,
+          "cvr": 0.14634146341463414,
+          "cpc": 1588.878048780488,
+          "cpa": 10857.333333333334,
+          "roas": 6.355151664005895
+        },
+        {
+          "keyword": "볼펜 녹음기 1위",
+          "area": "검색",
+          "impressions": 569.0,
+          "clicks": 40.0,
+          "spend": 80677.0,
+          "orders": 8.0,
+          "revenue": 552000.0,
+          "ctr": 0.070298769771529,
+          "cvr": 0.2,
+          "cpc": 2016.925,
+          "cpa": 10084.625,
+          "roas": 6.842098739417678
+        },
+        {
+          "keyword": "소형 녹음기 장시간 몰래녹취 고음질",
+          "area": "검색",
+          "impressions": 1292.0,
+          "clicks": 33.0,
+          "spend": 72718.0,
+          "orders": 3.0,
+          "revenue": 207000.0,
+          "ctr": 0.025541795665634675,
+          "cvr": 0.09090909090909091,
+          "cpc": 2203.5757575757575,
+          "cpa": 24239.333333333332,
+          "roas": 2.8466129431502516
+        },
+        {
+          "keyword": "볼펜",
+          "area": "검색",
+          "impressions": 1510.0,
+          "clicks": 22.0,
+          "spend": 14335.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.01456953642384106,
+          "cvr": 0.0,
+          "cpc": 651.5909090909091,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "녹음펜",
+          "area": "검색",
+          "impressions": 365.0,
+          "clicks": 12.0,
+          "spend": 22371.0,
+          "orders": 1.0,
+          "revenue": 69000.0,
+          "ctr": 0.03287671232876712,
+          "cvr": 0.08333333333333333,
+          "cpc": 1864.25,
+          "cpa": 22371.0,
+          "roas": 3.084350274909481
+        },
+        {
+          "keyword": "고성능 소형 녹음기",
+          "area": "검색",
+          "impressions": 665.0,
+          "clicks": 11.0,
+          "spend": 31496.0,
+          "orders": 1.0,
+          "revenue": 69000.0,
+          "ctr": 0.016541353383458645,
+          "cvr": 0.09090909090909091,
+          "cpc": 2863.2727272727275,
+          "cpa": 31496.0,
+          "roas": 2.190754381508763
+        },
+        {
+          "keyword": "녹음",
+          "area": "검색",
+          "impressions": 551.0,
+          "clicks": 11.0,
+          "spend": 14766.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.019963702359346643,
+          "cvr": 0.0,
+          "cpc": 1342.3636363636363,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "녹음 볼펜",
+          "area": "검색",
+          "impressions": 145.0,
+          "clicks": 10.0,
+          "spend": 11210.0,
+          "orders": 2.0,
+          "revenue": 138000.0,
+          "ctr": 0.06896551724137931,
+          "cvr": 0.2,
+          "cpc": 1121.0,
+          "cpa": 5605.0,
+          "roas": 12.31043710972346
+        },
+        {
+          "keyword": "디큐브 c타입 볼펜녹음기",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 8.0,
+          "spend": 11923.0,
+          "orders": 3.0,
+          "revenue": 207000.0,
+          "ctr": 0.6153846153846154,
+          "cvr": 0.375,
+          "cpc": 1490.375,
+          "cpa": 3974.3333333333335,
+          "roas": 17.361402331627946
+        },
+        {
+          "keyword": "볼펜형 녹음기",
+          "area": "검색",
+          "impressions": 212.0,
+          "clicks": 6.0,
+          "spend": 12441.0,
+          "orders": 2.0,
+          "revenue": 138000.0,
+          "ctr": 0.02830188679245283,
+          "cvr": 0.3333333333333333,
+          "cpc": 2073.5,
+          "cpa": 6220.5,
+          "roas": 11.092355919942127
+        },
+        {
+          "keyword": "펜 녹음기 c타입",
+          "area": "검색",
+          "impressions": 40.0,
+          "clicks": 6.0,
+          "spend": 8685.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.15,
+          "cvr": 0.0,
+          "cpc": 1447.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "휴대용",
+          "area": "검색",
+          "impressions": 708.0,
+          "clicks": 6.0,
+          "spend": 5080.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.00847457627118644,
+          "cvr": 0.0,
+          "cpc": 846.6666666666666,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "녹음볼펜",
+          "area": "검색",
+          "impressions": 89.0,
+          "clicks": 5.0,
+          "spend": 11145.0,
+          "orders": 1.0,
+          "revenue": 69000.0,
+          "ctr": 0.056179775280898875,
+          "cvr": 0.2,
+          "cpc": 2229.0,
+          "cpa": 11145.0,
+          "roas": 6.191117092866756
+        },
+        {
+          "keyword": "디큐브 녹음기",
+          "area": "검색",
+          "impressions": 31.0,
+          "clicks": 5.0,
+          "spend": 6617.0,
+          "orders": 3.0,
+          "revenue": 345000.0,
+          "ctr": 0.16129032258064516,
+          "cvr": 0.6,
+          "cpc": 1323.4,
+          "cpa": 2205.6666666666665,
+          "roas": 52.13843131328397
+        },
+        {
+          "keyword": "초소형녹음기",
+          "area": "검색",
+          "impressions": 482.0,
+          "clicks": 5.0,
+          "spend": 15340.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.01037344398340249,
+          "cvr": 0.0,
+          "cpc": 3068.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "펜형 녹음기",
+          "area": "검색",
+          "impressions": 74.0,
+          "clicks": 5.0,
+          "spend": 5917.0,
+          "orders": 1.0,
+          "revenue": 69000.0,
+          "ctr": 0.06756756756756757,
+          "cvr": 0.2,
+          "cpc": 1183.4,
+          "cpa": 5917.0,
+          "roas": 11.661314855501098
+        },
+        {
+          "keyword": "24시간 녹음기",
+          "area": "검색",
+          "impressions": 98.0,
+          "clicks": 4.0,
+          "spend": 3340.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.04081632653061224,
+          "cvr": 0.0,
+          "cpc": 835.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104589683,
+      "name": "매복_재난라디오_12.06_스마트 300원 12,13 120 원 ,12/23 +1만 매출최적화 광고 복사본",
+      "short_name": "매복_재난라디오_12.06_스마트 300원 12,13 120 원 ,12/…",
+      "type": "매출 최적화",
+      "product": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴,{\"구성\":\"서바이복스 단품\"},{\"구성\"",
+      "start_date": "2026.01.15",
+      "areas": {
+        "비검색": {
+          "impressions": 458818.0,
+          "clicks": 1082.0,
+          "spend": 290083.0,
+          "orders": 36.0,
+          "qty": 41.0,
+          "revenue": 2096500.0,
+          "ctr": 0.002358233547942757,
+          "cvr": 0.033271719038817,
+          "cpc": 268.0988909426987,
+          "cpa": 8057.861111111111,
+          "roas": 7.227241858364675
+        },
+        "검색": {
+          "impressions": 37802.0,
+          "clicks": 1004.0,
+          "spend": 1047041.0,
+          "orders": 77.0,
+          "qty": 82.0,
+          "revenue": 4222400.0,
+          "ctr": 0.02655944129940215,
+          "cvr": 0.07669322709163347,
+          "cpc": 1042.8695219123506,
+          "cpa": 13597.935064935065,
+          "roas": 4.032697859969189
+        }
+      },
+      "total": {
+        "impressions": 496620.0,
+        "clicks": 2086.0,
+        "spend": 1337124.0,
+        "orders": 113.0,
+        "qty": 123.0,
+        "revenue": 6318900.0,
+        "ctr": 0.004200394667955378,
+        "cvr": 0.05417066155321189,
+        "cpc": 640.9990412272291,
+        "cpa": 11832.955752212389,
+        "roas": 4.725739721970438
+      },
+      "keywords": [
+        {
+          "keyword": "재난용 라디오",
+          "area": "검색",
+          "impressions": 1540.0,
+          "clicks": 72.0,
+          "spend": 85329.0,
+          "orders": 6.0,
+          "revenue": 298200.0,
+          "ctr": 0.046753246753246755,
+          "cvr": 0.08333333333333333,
+          "cpc": 1185.125,
+          "cpa": 14221.5,
+          "roas": 3.494708715676968
+        },
+        {
+          "keyword": "라디오",
+          "area": "검색",
+          "impressions": 6498.0,
+          "clicks": 66.0,
+          "spend": 101832.0,
+          "orders": 1.0,
+          "revenue": 47900.0,
+          "ctr": 0.010156971375807941,
+          "cvr": 0.015151515151515152,
+          "cpc": 1542.909090909091,
+          "cpa": 101832.0,
+          "roas": 0.4703825909340875
+        },
+        {
+          "keyword": "크랭크 라디오",
+          "area": "검색",
+          "impressions": 864.0,
+          "clicks": 59.0,
+          "spend": 95187.0,
+          "orders": 10.0,
+          "revenue": 489800.0,
+          "ctr": 0.06828703703703703,
+          "cvr": 0.1694915254237288,
+          "cpc": 1613.3389830508474,
+          "cpa": 9518.7,
+          "roas": 5.145660646937082
+        },
+        {
+          "keyword": "소형 라디오 추천 국산",
+          "area": "검색",
+          "impressions": 1998.0,
+          "clicks": 42.0,
+          "spend": 42268.0,
+          "orders": 4.0,
+          "revenue": 197000.0,
+          "ctr": 0.021021021021021023,
+          "cvr": 0.09523809523809523,
+          "cpc": 1006.3809523809524,
+          "cpa": 10567.0,
+          "roas": 4.660736254376833
+        },
+        {
+          "keyword": "자가발전 충전기",
+          "area": "검색",
+          "impressions": 965.0,
+          "clicks": 36.0,
+          "spend": 14951.0,
+          "orders": 1.0,
+          "revenue": 49700.0,
+          "ctr": 0.03730569948186528,
+          "cvr": 0.027777777777777776,
+          "cpc": 415.30555555555554,
+          "cpa": 14951.0,
+          "roas": 3.3241923617149354
+        },
+        {
+          "keyword": "전쟁 대비 생존용품",
+          "area": "검색",
+          "impressions": 2176.0,
+          "clicks": 34.0,
+          "spend": 16345.0,
+          "orders": 1.0,
+          "revenue": 47900.0,
+          "ctr": 0.015625,
+          "cvr": 0.029411764705882353,
+          "cpc": 480.7352941176471,
+          "cpa": 16345.0,
+          "roas": 2.9305598042214744
+        },
+        {
+          "keyword": "자가발전 라디오",
+          "area": "검색",
+          "impressions": 801.0,
+          "clicks": 33.0,
+          "spend": 48760.0,
+          "orders": 5.0,
+          "revenue": 294600.0,
+          "ctr": 0.04119850187265917,
+          "cvr": 0.15151515151515152,
+          "cpc": 1477.5757575757575,
+          "cpa": 9752.0,
+          "roas": 6.041837571780148
+        },
+        {
+          "keyword": "국산 라디오 정품",
+          "area": "검색",
+          "impressions": 1046.0,
+          "clicks": 25.0,
+          "spend": 39314.0,
+          "orders": 3.0,
+          "revenue": 145500.0,
+          "ctr": 0.02390057361376673,
+          "cvr": 0.12,
+          "cpc": 1572.56,
+          "cpa": 13104.666666666666,
+          "roas": 3.700971664038256
+        },
+        {
+          "keyword": "휴대용 라디오",
+          "area": "검색",
+          "impressions": 1552.0,
+          "clicks": 25.0,
+          "spend": 30264.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.01610824742268041,
+          "cvr": 0.0,
+          "cpc": 1210.56,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "재난용품 생존키트",
+          "area": "검색",
+          "impressions": 1380.0,
+          "clicks": 23.0,
+          "spend": 10806.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.016666666666666666,
+          "cvr": 0.0,
+          "cpc": 469.82608695652175,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "자가발전 손전등",
+          "area": "검색",
+          "impressions": 403.0,
+          "clicks": 21.0,
+          "spend": 19767.0,
+          "orders": 1.0,
+          "revenue": 49700.0,
+          "ctr": 0.052109181141439205,
+          "cvr": 0.047619047619047616,
+          "cpc": 941.2857142857143,
+          "cpa": 19767.0,
+          "roas": 2.514291495927556
+        },
+        {
+          "keyword": "크랭크라디오",
+          "area": "검색",
+          "impressions": 503.0,
+          "clicks": 19.0,
+          "spend": 14577.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.03777335984095427,
+          "cvr": 0.0,
+          "cpc": 767.2105263157895,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "생존 키트",
+          "area": "검색",
+          "impressions": 835.0,
+          "clicks": 17.0,
+          "spend": 8611.0,
+          "orders": 2.0,
+          "revenue": 97600.0,
+          "ctr": 0.02035928143712575,
+          "cvr": 0.11764705882352941,
+          "cpc": 506.52941176470586,
+          "cpa": 4305.5,
+          "roas": 11.334339797932877
+        },
+        {
+          "keyword": "단파 라디오",
+          "area": "검색",
+          "impressions": 464.0,
+          "clicks": 12.0,
+          "spend": 12633.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02586206896551724,
+          "cvr": 0.0,
+          "cpc": 1052.75,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "생존키트",
+          "area": "검색",
+          "impressions": 653.0,
+          "clicks": 12.0,
+          "spend": 7409.0,
+          "orders": 1.0,
+          "revenue": 49700.0,
+          "ctr": 0.018376722817764167,
+          "cvr": 0.08333333333333333,
+          "cpc": 617.4166666666666,
+          "cpa": 7409.0,
+          "roas": 6.70805776757997
+        },
+        {
+          "keyword": "재난 비상용품 세트",
+          "area": "검색",
+          "impressions": 672.0,
+          "clicks": 12.0,
+          "spend": 5966.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.017857142857142856,
+          "cvr": 0.0,
+          "cpc": 497.1666666666667,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가정용 라디오구매1위",
+          "area": "검색",
+          "impressions": 414.0,
+          "clicks": 11.0,
+          "spend": 9429.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.026570048309178744,
+          "cvr": 0.0,
+          "cpc": 857.1818181818181,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "자가발전",
+          "area": "검색",
+          "impressions": 614.0,
+          "clicks": 10.0,
+          "spend": 11042.0,
+          "orders": 1.0,
+          "revenue": 49700.0,
+          "ctr": 0.016286644951140065,
+          "cvr": 0.1,
+          "cpc": 1104.2,
+          "cpa": 11042.0,
+          "roas": 4.500996196341243
+        },
+        {
+          "keyword": "전쟁 대비 생존키트",
+          "area": "검색",
+          "impressions": 579.0,
+          "clicks": 10.0,
+          "spend": 6208.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.017271157167530225,
+          "cvr": 0.0,
+          "cpc": 620.8,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 led",
+          "area": "검색",
+          "impressions": 46.0,
+          "clicks": 9.0,
+          "spend": 14043.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.1956521739130435,
+          "cvr": 0.0,
+          "cpc": 1560.3333333333333,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104706704,
+      "name": "와야 문어발 마사지기 광고 테스트 0303",
+      "short_name": "와야 문어발 마사지기 광고 테스트 0303",
+      "type": "매출 최적화",
+      "product": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건,다크그린,다크그린,8헤드,8헤드",
+      "start_date": "2026.03.03",
+      "areas": {
+        "비검색": {
+          "impressions": 1119351.0,
+          "clicks": 3976.0,
+          "spend": 992882.0,
+          "orders": 41.0,
+          "qty": 41.0,
+          "revenue": 2967700.0,
+          "ctr": 0.0035520582909203636,
+          "cvr": 0.010311871227364185,
+          "cpc": 249.7188128772636,
+          "cpa": 24216.634146341465,
+          "roas": 2.9889755278069297
+        },
+        "검색": {
+          "impressions": 6032.0,
+          "clicks": 204.0,
+          "spend": 229410.0,
+          "orders": 21.0,
+          "qty": 21.0,
+          "revenue": 1657000.0,
+          "ctr": 0.033819628647214856,
+          "cvr": 0.10294117647058823,
+          "cpc": 1124.5588235294117,
+          "cpa": 10924.285714285714,
+          "roas": 7.2228760734056925
+        }
+      },
+      "total": {
+        "impressions": 1125383.0,
+        "clicks": 4180.0,
+        "spend": 1222292.0,
+        "orders": 62.0,
+        "qty": 62.0,
+        "revenue": 4624700.0,
+        "ctr": 0.003714291045803962,
+        "cvr": 0.014832535885167464,
+        "cpc": 292.41435406698565,
+        "cpa": 19714.387096774193,
+        "roas": 3.7836294437008506
+      },
+      "keywords": [
+        {
+          "keyword": "엉덩이 마사지기",
+          "area": "검색",
+          "impressions": 596.0,
+          "clicks": 24.0,
+          "spend": 26199.0,
+          "orders": 1.0,
+          "revenue": 79000.0,
+          "ctr": 0.040268456375838924,
+          "cvr": 0.041666666666666664,
+          "cpc": 1091.625,
+          "cpa": 26199.0,
+          "roas": 3.0153822664987215
+        },
+        {
+          "keyword": "강력 전신 마사지 16 헤드 마사지기",
+          "area": "검색",
+          "impressions": 107.0,
+          "clicks": 15.0,
+          "spend": 28163.0,
+          "orders": 3.0,
+          "revenue": 237000.0,
+          "ctr": 0.14018691588785046,
+          "cvr": 0.2,
+          "cpc": 1877.5333333333333,
+          "cpa": 9387.666666666666,
+          "roas": 8.415296665838156
+        },
+        {
+          "keyword": "16헤드 마사지기",
+          "area": "검색",
+          "impressions": 143.0,
+          "clicks": 11.0,
+          "spend": 9127.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.07692307692307693,
+          "cvr": 0.0,
+          "cpc": 829.7272727272727,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "문어발 마사지기",
+          "area": "검색",
+          "impressions": 73.0,
+          "clicks": 8.0,
+          "spend": 4492.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.1095890410958904,
+          "cvr": 0.0,
+          "cpc": 561.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "진동 안마기",
+          "area": "검색",
+          "impressions": 431.0,
+          "clicks": 5.0,
+          "spend": 2776.0,
+          "orders": 1.0,
+          "revenue": 79000.0,
+          "ctr": 0.01160092807424594,
+          "cvr": 0.2,
+          "cpc": 555.2,
+          "cpa": 2776.0,
+          "roas": 28.45821325648415
+        },
+        {
+          "keyword": "근막마사지",
+          "area": "검색",
+          "impressions": 63.0,
+          "clicks": 4.0,
+          "spend": 1063.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.06349206349206349,
+          "cvr": 0.0,
+          "cpc": 265.75,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "문어발 안마기",
+          "area": "검색",
+          "impressions": 142.0,
+          "clicks": 4.0,
+          "spend": 3143.0,
+          "orders": 1.0,
+          "revenue": 79000.0,
+          "ctr": 0.028169014084507043,
+          "cvr": 0.25,
+          "cpc": 785.75,
+          "cpa": 3143.0,
+          "roas": 25.13522112631244
+        },
+        {
+          "keyword": "와야 문어발 마사지기",
+          "area": "검색",
+          "impressions": 41.0,
+          "clicks": 4.0,
+          "spend": 2528.0,
+          "orders": 1.0,
+          "revenue": 79000.0,
+          "ctr": 0.0975609756097561,
+          "cvr": 0.25,
+          "cpc": 632.0,
+          "cpa": 2528.0,
+          "roas": 31.25
+        },
+        {
+          "keyword": "진동 마사지기",
+          "area": "검색",
+          "impressions": 398.0,
+          "clicks": 4.0,
+          "spend": 5353.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.010050251256281407,
+          "cvr": 0.0,
+          "cpc": 1338.25,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "근막 마사지건",
+          "area": "검색",
+          "impressions": 29.0,
+          "clicks": 3.0,
+          "spend": 309.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.10344827586206896,
+          "cvr": 0.0,
+          "cpc": 103.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "근막총",
+          "area": "검색",
+          "impressions": 129.0,
+          "clicks": 3.0,
+          "spend": 3251.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.023255813953488372,
+          "cvr": 0.0,
+          "cpc": 1083.6666666666667,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "대면적 전방위 마사지기",
+          "area": "검색",
+          "impressions": 7.0,
+          "clicks": 3.0,
+          "spend": 5212.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.42857142857142855,
+          "cvr": 0.0,
+          "cpc": 1737.3333333333333,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "마사지건",
+          "area": "검색",
+          "impressions": 1022.0,
+          "clicks": 3.0,
+          "spend": 11313.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.0029354207436399216,
+          "cvr": 0.0,
+          "cpc": 3771.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "16헤드 근막총",
+          "area": "검색",
+          "impressions": 35.0,
+          "clicks": 2.0,
+          "spend": 2466.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.05714285714285714,
+          "cvr": 0.0,
+          "cpc": 1233.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "대면적 전방위마사지",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 2.0,
+          "spend": 549.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.15384615384615385,
+          "cvr": 0.0,
+          "cpc": 274.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "마사지",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 2.0,
+          "spend": 6396.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.6666666666666666,
+          "cvr": 0.0,
+          "cpc": 3198.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "마사지건",
+          "area": "검색",
+          "impressions": 446.0,
+          "clicks": 2.0,
+          "spend": 8371.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.004484304932735426,
+          "cvr": 0.0,
+          "cpc": 4185.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "엉덩이 마사지",
+          "area": "검색",
+          "impressions": 45.0,
+          "clicks": 2.0,
+          "spend": 1530.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.044444444444444446,
+          "cvr": 0.0,
+          "cpc": 765.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "엉덩이마사지기",
+          "area": "검색",
+          "impressions": 62.0,
+          "clicks": 2.0,
+          "spend": 650.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.03225806451612903,
+          "cvr": 0.0,
+          "cpc": 325.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "여성 성인 강력진동마사지",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 2.0,
+          "spend": 2207.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.4,
+          "cvr": 0.0,
+          "cpc": 1103.5,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 103773068,
+      "name": "애드마이저 테스트중",
+      "short_name": "애드마이저 테스트중",
+      "type": "매출 최적화",
+      "product": "노트북 태블릿PC 아이폰12 프로 아이패드 갤럭시탭 거치대 스탠드형 벽걸이형 모음전,{\"상품선택\":\"베이식스",
+      "start_date": "2025.04.30",
+      "areas": {
+        "비검색": {
+          "impressions": 4319080.0,
+          "clicks": 2437.0,
+          "spend": 722185.0,
+          "orders": 40.0,
+          "qty": 43.0,
+          "revenue": 2321140.0,
+          "ctr": 0.0005642405327060393,
+          "cvr": 0.016413623307345096,
+          "cpc": 296.34181370537544,
+          "cpa": 18054.625,
+          "roas": 3.214051801131289
+        },
+        "검색": {
+          "impressions": 3180.0,
+          "clicks": 353.0,
+          "spend": 93863.0,
+          "orders": 12.0,
+          "qty": 12.0,
+          "revenue": 306040.0,
+          "ctr": 0.1110062893081761,
+          "cvr": 0.0339943342776204,
+          "cpc": 265.90084985835693,
+          "cpa": 7821.916666666667,
+          "roas": 3.2604966813334326
+        }
+      },
+      "total": {
+        "impressions": 4322260.0,
+        "clicks": 2790.0,
+        "spend": 816048.0,
+        "orders": 52.0,
+        "qty": 55.0,
+        "revenue": 2627180.0,
+        "ctr": 0.0006454956434828076,
+        "cvr": 0.01863799283154122,
+        "cpc": 292.49032258064517,
+        "cpa": 15693.23076923077,
+        "roas": 3.2193939572182027
+      },
+      "keywords": [
+        {
+          "keyword": "의료용 허리마사지기",
+          "area": "검색",
+          "impressions": 67.0,
+          "clicks": 5.0,
+          "spend": 2055.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.07462686567164178,
+          "cvr": 0.0,
+          "cpc": 411.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "portable heater for bathroom slim",
+          "area": "검색",
+          "impressions": 16.0,
+          "clicks": 3.0,
+          "spend": 546.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.1875,
+          "cvr": 0.0,
+          "cpc": 182.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "usb 데이터 차단 어댑터",
+          "area": "검색",
+          "impressions": 20.0,
+          "clicks": 3.0,
+          "spend": 300.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.15,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가민 젠더",
+          "area": "검색",
+          "impressions": 51.0,
+          "clicks": 3.0,
+          "spend": 300.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.058823529411764705,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가정용 욕실히터",
+          "area": "검색",
+          "impressions": 157.0,
+          "clicks": 3.0,
+          "spend": 1995.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.01910828025477707,
+          "cvr": 0.0,
+          "cpc": 665.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "동전녹음기",
+          "area": "검색",
+          "impressions": 17.0,
+          "clicks": 3.0,
+          "spend": 1317.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.17647058823529413,
+          "cvr": 0.0,
+          "cpc": 439.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "디큐브맥세이프 보조배터리 20000",
+          "area": "검색",
+          "impressions": 4.0,
+          "clicks": 3.0,
+          "spend": 1130.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.75,
+          "cvr": 0.0,
+          "cpc": 376.6666666666667,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "맥북 맥세이프",
+          "area": "검색",
+          "impressions": 160.0,
+          "clicks": 3.0,
+          "spend": 302.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.01875,
+          "cvr": 0.0,
+          "cpc": 100.66666666666667,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "애플펜슬 단자",
+          "area": "검색",
+          "impressions": 8.0,
+          "clicks": 3.0,
+          "spend": 475.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.375,
+          "cvr": 0.0,
+          "cpc": 158.33333333333334,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "USB C 데이터 차단 젠더",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 2.0,
+          "spend": 1191.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.4,
+          "cvr": 0.0,
+          "cpc": 595.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "c to a타입 케이블 3in1",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 2.0,
+          "spend": 1139.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.4,
+          "cvr": 0.0,
+          "cpc": 569.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "c to c 변환 젠더",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 2.0,
+          "spend": 200.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.4,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "c to c타입 케이블 80gbps",
+          "area": "검색",
+          "impressions": 4.0,
+          "clicks": 2.0,
+          "spend": 244.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 122.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "dicube",
+          "area": "검색",
+          "impressions": 9.0,
+          "clicks": 2.0,
+          "spend": 357.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2222222222222222,
+          "cvr": 0.0,
+          "cpc": 178.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "dicube",
+          "area": "검색",
+          "impressions": 11.0,
+          "clicks": 2.0,
+          "spend": 393.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.18181818181818182,
+          "cvr": 0.0,
+          "cpc": 196.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "usb a to c 젠더 3.2 20gbps",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 2.0,
+          "spend": 223.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 111.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "usb c타입 콤보",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 2.0,
+          "spend": 202.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.6666666666666666,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "usb 데이터 차단 어댑터",
+          "area": "검색",
+          "impressions": 23.0,
+          "clicks": 2.0,
+          "spend": 204.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.08695652173913043,
+          "cvr": 0.0,
+          "cpc": 102.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "usb차단 어댑터",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 2.0,
+          "spend": 202.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.4,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "usb형 녹음기",
+          "area": "검색",
+          "impressions": 25.0,
+          "clicks": 2.0,
+          "spend": 385.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.08,
+          "cvr": 0.0,
+          "cpc": 192.5,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 103088767,
+      "name": "한일 코잠매트 매출최적화 2024-0906 초기설정 제외 12.14 25/12/17 500% 25/12/19 300%",
+      "short_name": "한일 코잠매트 매출최적화 2024-0906 초기설정 제외 12.14 25…",
+      "type": "매출 최적화",
+      "product": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요,단일색상,단일색상,1",
+      "start_date": "2024.09.06",
+      "areas": {
+        "비검색": {
+          "impressions": 1313511.0,
+          "clicks": 2887.0,
+          "spend": 384201.0,
+          "orders": 20.0,
+          "qty": 20.0,
+          "revenue": 1110200.0,
+          "ctr": 0.002197926016607398,
+          "cvr": 0.006927606511950121,
+          "cpc": 133.07966747488743,
+          "cpa": 19210.05,
+          "roas": 2.8896332909076237
+        },
+        "검색": {
+          "impressions": 7418.0,
+          "clicks": 326.0,
+          "spend": 363993.0,
+          "orders": 17.0,
+          "qty": 18.0,
+          "revenue": 1024320.0,
+          "ctr": 0.04394715556753842,
+          "cvr": 0.05214723926380368,
+          "cpc": 1116.5429447852762,
+          "cpa": 21411.352941176472,
+          "roas": 2.8141200517592373
+        }
+      },
+      "total": {
+        "impressions": 1320929.0,
+        "clicks": 3213.0,
+        "spend": 748194.0,
+        "orders": 37.0,
+        "qty": 38.0,
+        "revenue": 2134520.0,
+        "ctr": 0.0024323790302128276,
+        "cvr": 0.011515717398070339,
+        "cpc": 232.86461251167134,
+        "cpa": 20221.45945945946,
+        "roas": 2.8528964412973106
+      },
+      "keywords": [
+        {
+          "keyword": "전기매트",
+          "area": "검색",
+          "impressions": 1292.0,
+          "clicks": 11.0,
+          "spend": 13719.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.008513931888544891,
+          "cvr": 0.0,
+          "cpc": 1247.1818181818182,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "전자파없는 탄소매트",
+          "area": "검색",
+          "impressions": 908.0,
+          "clicks": 10.0,
+          "spend": 11802.0,
+          "orders": 1.0,
+          "revenue": 59700.0,
+          "ctr": 0.011013215859030838,
+          "cvr": 0.1,
+          "cpc": 1180.2,
+          "cpa": 11802.0,
+          "roas": 5.058464667005592
+        },
+        {
+          "keyword": "1인용 전기담요",
+          "area": "검색",
+          "impressions": 194.0,
+          "clicks": 8.0,
+          "spend": 16886.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.041237113402061855,
+          "cvr": 0.0,
+          "cpc": 2110.75,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "탄소매트",
+          "area": "검색",
+          "impressions": 511.0,
+          "clicks": 8.0,
+          "spend": 11580.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.015655577299412915,
+          "cvr": 0.0,
+          "cpc": 1447.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "1인 탄소매트",
+          "area": "검색",
+          "impressions": 280.0,
+          "clicks": 7.0,
+          "spend": 10093.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.025,
+          "cvr": 0.0,
+          "cpc": 1441.857142857143,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "2인용 전기담요 침대용",
+          "area": "검색",
+          "impressions": 431.0,
+          "clicks": 7.0,
+          "spend": 13587.0,
+          "orders": 2.0,
+          "revenue": 119400.0,
+          "ctr": 0.016241299303944315,
+          "cvr": 0.2857142857142857,
+          "cpc": 1941.0,
+          "cpa": 6793.5,
+          "roas": 8.787811879001987
+        },
+        {
+          "keyword": "2인용 전기장판 침대용",
+          "area": "검색",
+          "impressions": 151.0,
+          "clicks": 5.0,
+          "spend": 5959.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.033112582781456956,
+          "cvr": 0.0,
+          "cpc": 1191.8,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "얇은 전기장판",
+          "area": "검색",
+          "impressions": 51.0,
+          "clicks": 5.0,
+          "spend": 6586.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.09803921568627451,
+          "cvr": 0.0,
+          "cpc": 1317.2,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "보국 전기장판 1인용",
+          "area": "검색",
+          "impressions": 397.0,
+          "clicks": 4.0,
+          "spend": 4029.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.010075566750629723,
+          "cvr": 0.0,
+          "cpc": 1007.25,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 전기매트 1인용",
+          "area": "검색",
+          "impressions": 398.0,
+          "clicks": 4.0,
+          "spend": 2655.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.010050251256281407,
+          "cvr": 0.0,
+          "cpc": 663.75,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "전자파없는 전기요",
+          "area": "검색",
+          "impressions": 226.0,
+          "clicks": 4.0,
+          "spend": 3221.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.017699115044247787,
+          "cvr": 0.0,
+          "cpc": 805.25,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "굿모닝 플러스 코지 워셔블 카본 전기요",
+          "area": "검색",
+          "impressions": 7.0,
+          "clicks": 3.0,
+          "spend": 1193.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.42857142857142855,
+          "cvr": 0.0,
+          "cpc": 397.6666666666667,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "더블유와이씨 전기장판",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 3.0,
+          "spend": 540.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 180.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "워셔블 전기매트",
+          "area": "검색",
+          "impressions": 122.0,
+          "clicks": 3.0,
+          "spend": 7543.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02459016393442623,
+          "cvr": 0.0,
+          "cpc": 2514.3333333333335,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "한일 탄소매트 싱글",
+          "area": "검색",
+          "impressions": 43.0,
+          "clicks": 3.0,
+          "spend": 687.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.06976744186046512,
+          "cvr": 0.0,
+          "cpc": 229.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "1인용 전기요",
+          "area": "검색",
+          "impressions": 91.0,
+          "clicks": 2.0,
+          "spend": 901.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02197802197802198,
+          "cvr": 0.0,
+          "cpc": 450.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "2인용 전기요 침대용",
+          "area": "검색",
+          "impressions": 19.0,
+          "clicks": 2.0,
+          "spend": 3628.0,
+          "orders": 1.0,
+          "revenue": 59700.0,
+          "ctr": 0.10526315789473684,
+          "cvr": 0.5,
+          "cpc": 1814.0,
+          "cpa": 3628.0,
+          "roas": 16.45534729878721
+        },
+        {
+          "keyword": "emf 무전자파 전기장판",
+          "area": "검색",
+          "impressions": 7.0,
+          "clicks": 2.0,
+          "spend": 280.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2857142857142857,
+          "cvr": 0.0,
+          "cpc": 140.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가로가 94cm인 전기매트",
+          "area": "검색",
+          "impressions": 10.0,
+          "clicks": 2.0,
+          "spend": 1117.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 558.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "곰표한일전자 전기요",
+          "area": "검색",
+          "impressions": 10.0,
+          "clicks": 2.0,
+          "spend": 1709.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 854.5,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104727976,
+      "name": "쿠랩 계란찜기 매출 최적화_450_250310",
+      "short_name": "쿠랩 계란찜기 매출 최적화_450_250310",
+      "type": "매출 최적화",
+      "product": "쿠랩 프리미엄 스텐 계란찜기,2단,2단",
+      "start_date": "2026.03.10",
+      "areas": {
+        "비검색": {
+          "impressions": 625700.0,
+          "clicks": 1448.0,
+          "spend": 218113.0,
+          "orders": 17.0,
+          "qty": 17.0,
+          "revenue": 743600.0,
+          "ctr": 0.0023142080869426244,
+          "cvr": 0.011740331491712707,
+          "cpc": 150.63052486187846,
+          "cpa": 12830.176470588236,
+          "roas": 3.409241998413666
+        },
+        "검색": {
+          "impressions": 6141.0,
+          "clicks": 197.0,
+          "spend": 141115.0,
+          "orders": 10.0,
+          "qty": 10.0,
+          "revenue": 493600.0,
+          "ctr": 0.03207946588503501,
+          "cvr": 0.050761421319796954,
+          "cpc": 716.3197969543147,
+          "cpa": 14111.5,
+          "roas": 3.4978563582893383
+        }
+      },
+      "total": {
+        "impressions": 631841.0,
+        "clicks": 1645.0,
+        "spend": 359228.0,
+        "orders": 27.0,
+        "qty": 27.0,
+        "revenue": 1237200.0,
+        "ctr": 0.002603503096506874,
+        "cvr": 0.01641337386018237,
+        "cpc": 218.3756838905775,
+        "cpa": 13304.74074074074,
+        "roas": 3.444052245370628
+      },
+      "keywords": [
+        {
+          "keyword": "쿠랩",
+          "area": "검색",
+          "impressions": 41.0,
+          "clicks": 15.0,
+          "spend": 1500.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.36585365853658536,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "쿠랩 계란찜기",
+          "area": "검색",
+          "impressions": 39.0,
+          "clicks": 13.0,
+          "spend": 9857.0,
+          "orders": 2.0,
+          "revenue": 79600.0,
+          "ctr": 0.3333333333333333,
+          "cvr": 0.15384615384615385,
+          "cpc": 758.2307692307693,
+          "cpa": 4928.5,
+          "roas": 8.075479354773258
+        },
+        {
+          "keyword": "계란 찜기",
+          "area": "검색",
+          "impressions": 428.0,
+          "clicks": 9.0,
+          "spend": 3243.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02102803738317757,
+          "cvr": 0.0,
+          "cpc": 360.3333333333333,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "계란 삶는 기계",
+          "area": "검색",
+          "impressions": 253.0,
+          "clicks": 7.0,
+          "spend": 12882.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02766798418972332,
+          "cvr": 0.0,
+          "cpc": 1840.2857142857142,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "계란 찜기",
+          "area": "검색",
+          "impressions": 289.0,
+          "clicks": 5.0,
+          "spend": 10900.0,
+          "orders": 1.0,
+          "revenue": 49800.0,
+          "ctr": 0.01730103806228374,
+          "cvr": 0.2,
+          "cpc": 2180.0,
+          "cpa": 10900.0,
+          "roas": 4.568807339449541
+        },
+        {
+          "keyword": "계란찜기",
+          "area": "검색",
+          "impressions": 577.0,
+          "clicks": 5.0,
+          "spend": 6828.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.008665511265164644,
+          "cvr": 0.0,
+          "cpc": 1365.6,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "계란찜기 1위제품",
+          "area": "검색",
+          "impressions": 189.0,
+          "clicks": 5.0,
+          "spend": 3392.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.026455026455026454,
+          "cvr": 0.0,
+          "cpc": 678.4,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "쿠랩 찜기",
+          "area": "검색",
+          "impressions": 12.0,
+          "clicks": 4.0,
+          "spend": 2438.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.3333333333333333,
+          "cvr": 0.0,
+          "cpc": 609.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "클래파 계란찜기",
+          "area": "검색",
+          "impressions": 263.0,
+          "clicks": 4.0,
+          "spend": 2970.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.015209125475285171,
+          "cvr": 0.0,
+          "cpc": 742.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "kulab",
+          "area": "검색",
+          "impressions": 7.0,
+          "clicks": 3.0,
+          "spend": 300.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.42857142857142855,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "계란찜기 1위제품",
+          "area": "검색",
+          "impressions": 142.0,
+          "clicks": 3.0,
+          "spend": 2045.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02112676056338028,
+          "cvr": 0.0,
+          "cpc": 681.6666666666666,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "국내산 스텐 계란찜기",
+          "area": "검색",
+          "impressions": 88.0,
+          "clicks": 3.0,
+          "spend": 1281.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.03409090909090909,
+          "cvr": 0.0,
+          "cpc": 427.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "국내산 스텐 계란찜기",
+          "area": "검색",
+          "impressions": 259.0,
+          "clicks": 3.0,
+          "spend": 671.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.011583011583011582,
+          "cvr": 0.0,
+          "cpc": 223.66666666666666,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "clapa 찜기",
+          "area": "검색",
+          "impressions": 17.0,
+          "clicks": 2.0,
+          "spend": 2372.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.11764705882352941,
+          "cvr": 0.0,
+          "cpc": 1186.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "계란 찜기",
+          "area": "검색",
+          "impressions": 1023.0,
+          "clicks": 2.0,
+          "spend": 2217.0,
+          "orders": 1.0,
+          "revenue": 39800.0,
+          "ctr": 0.0019550342130987292,
+          "cvr": 0.5,
+          "cpc": 1108.5,
+          "cpa": 2217.0,
+          "roas": 17.952187640956247
+        },
+        {
+          "keyword": "계란 찜기 2단",
+          "area": "검색",
+          "impressions": 14.0,
+          "clicks": 2.0,
+          "spend": 2842.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.14285714285714285,
+          "cvr": 0.0,
+          "cpc": 1421.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "계란찜기",
+          "area": "검색",
+          "impressions": 250.0,
+          "clicks": 2.0,
+          "spend": 2026.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.008,
+          "cvr": 0.0,
+          "cpc": 1013.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "구운계란 기계",
+          "area": "검색",
+          "impressions": 75.0,
+          "clicks": 2.0,
+          "spend": 213.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02666666666666667,
+          "cvr": 0.0,
+          "cpc": 106.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "구운계란기계",
+          "area": "검색",
+          "impressions": 58.0,
+          "clicks": 2.0,
+          "spend": 358.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.034482758620689655,
+          "cvr": 0.0,
+          "cpc": 179.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "달걀 찜기 스텐",
+          "area": "검색",
+          "impressions": 14.0,
+          "clicks": 2.0,
+          "spend": 6088.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.14285714285714285,
+          "cvr": 0.0,
+          "cpc": 3044.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104626337,
+      "name": "플렉시젠_케이블 外 비검색 120원",
+      "short_name": "플렉시젠_케이블 外 비검색 120원",
+      "type": "수동 성과형",
+      "product": "맥세이프 3in1 고속무선충전 거치대 워치 에어팟 3대 동시 고속충전 맥세이프링 스티커 증정 BWC-85,블",
+      "start_date": "2026.01.28",
+      "areas": {
+        "비검색": {
+          "impressions": 1472517.0,
+          "clicks": 2302.0,
+          "spend": 292803.0,
+          "orders": 1.0,
+          "qty": 1.0,
+          "revenue": 18900.0,
+          "ctr": 0.0015633096256274122,
+          "cvr": 0.0004344048653344917,
+          "cpc": 127.19504778453519,
+          "cpa": 292803.0,
+          "roas": 0.06454851897009252
+        }
+      },
+      "total": {
+        "impressions": 1472517.0,
+        "clicks": 2302.0,
+        "spend": 292803.0,
+        "orders": 1.0,
+        "qty": 1.0,
+        "revenue": 18900.0,
+        "ctr": 0.0015633096256274122,
+        "cvr": 0.0004344048653344917,
+        "cpc": 127.19504778453519,
+        "cpa": 292803.0,
+        "roas": 0.06454851897009252
+      },
+      "keywords": []
+    },
+    {
+      "id": 104727991,
+      "name": "플렉시젠 매출최적화_450_250310",
+      "short_name": "플렉시젠 매출최적화_450_250310",
+      "type": "매출 최적화",
+      "product": "디큐브 플렉시젠 189g 초경량 4포트 멀티 허브 노트북 거치대,{\"플렉시젠 노트북 거치대\":\"플렉시젠 H ",
+      "start_date": "2026.03.10",
+      "areas": {
+        "비검색": {
+          "impressions": 889167.0,
+          "clicks": 1549.0,
+          "spend": 229867.0,
+          "orders": 11.0,
+          "qty": 11.0,
+          "revenue": 375700.0,
+          "ctr": 0.0017420799467366649,
+          "cvr": 0.0071013557133634605,
+          "cpc": 148.39703034215623,
+          "cpa": 20897.0,
+          "roas": 1.6344233839568099
+        },
+        "검색": {
+          "impressions": 2171.0,
+          "clicks": 96.0,
+          "spend": 39777.0,
+          "orders": 5.0,
+          "qty": 5.0,
+          "revenue": 168100.0,
+          "ctr": 0.044219253800092125,
+          "cvr": 0.052083333333333336,
+          "cpc": 414.34375,
+          "cpa": 7955.4,
+          "roas": 4.226060286094979
+        }
+      },
+      "total": {
+        "impressions": 891338.0,
+        "clicks": 1645.0,
+        "spend": 269644.0,
+        "orders": 16.0,
+        "qty": 16.0,
+        "revenue": 543800.0,
+        "ctr": 0.00184554007570641,
+        "cvr": 0.009726443768996961,
+        "cpc": 163.91732522796352,
+        "cpa": 16852.75,
+        "roas": 2.01673317411105
+      },
+      "keywords": [
+        {
+          "keyword": "허브 거치대",
+          "area": "검색",
+          "impressions": 294.0,
+          "clicks": 9.0,
+          "spend": 2516.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.030612244897959183,
+          "cvr": 0.0,
+          "cpc": 279.55555555555554,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노트북 거치대 허브",
+          "area": "검색",
+          "impressions": 312.0,
+          "clicks": 8.0,
+          "spend": 3495.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02564102564102564,
+          "cvr": 0.0,
+          "cpc": 436.875,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "맥북 허브 거치대",
+          "area": "검색",
+          "impressions": 655.0,
+          "clicks": 7.0,
+          "spend": 3377.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.010687022900763359,
+          "cvr": 0.0,
+          "cpc": 482.42857142857144,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "디큐브",
+          "area": "검색",
+          "impressions": 119.0,
+          "clicks": 3.0,
+          "spend": 746.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.025210084033613446,
+          "cvr": 0.0,
+          "cpc": 248.66666666666666,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "맥북 거치대",
+          "area": "검색",
+          "impressions": 111.0,
+          "clicks": 3.0,
+          "spend": 831.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02702702702702703,
+          "cvr": 0.0,
+          "cpc": 277.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "플렉시젠",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 3.0,
+          "spend": 2127.0,
+          "orders": 1.0,
+          "revenue": 29700.0,
+          "ctr": 0.6,
+          "cvr": 0.3333333333333333,
+          "cpc": 709.0,
+          "cpa": 2127.0,
+          "roas": 13.963328631875882
+        },
+        {
+          "keyword": "17인치 노트북 거치대",
+          "area": "검색",
+          "impressions": 20.0,
+          "clicks": 2.0,
+          "spend": 1482.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.1,
+          "cvr": 0.0,
+          "cpc": 741.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "디큐브 거치대",
+          "area": "검색",
+          "impressions": 25.0,
+          "clicks": 2.0,
+          "spend": 882.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.08,
+          "cvr": 0.0,
+          "cpc": 441.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "멀티 렌선 노트북 거치대",
+          "area": "검색",
+          "impressions": 7.0,
+          "clicks": 2.0,
+          "spend": 2583.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2857142857142857,
+          "cvr": 0.0,
+          "cpc": 1291.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "플렉시젠x접이식노트북거치대알루미늄맥북",
+          "area": "검색",
+          "impressions": 8.0,
+          "clicks": 2.0,
+          "spend": 622.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.25,
+          "cvr": 0.0,
+          "cpc": 311.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "16인치 노트북 거치대 알루미늄",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 309.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 309.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "16인치 노트북 알루미늄",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 125.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 125.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "17인치 노트북 거치대",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 1.0,
+          "spend": 590.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.07692307692307693,
+          "cvr": 0.0,
+          "cpc": 590.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "2단 노트북 거치대",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 872.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 872.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "Cooler macbook",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "C타입 휴대용 노트북 펜거치대",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 112.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 112.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "P16hq 거치대",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 392.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 392.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "RUNDX 노트북 쿨링",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "USB노트북거치대",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 1.0,
+          "spend": 311.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.3333333333333333,
+          "cvr": 0.0,
+          "cpc": 311.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "laptop stand usb port",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 103655096,
+      "name": "로켓배송(슈퍼큐브777)_0328",
+      "short_name": "로켓배송(슈퍼큐브777)_0328",
+      "type": "매출 최적화",
+      "product": "디큐브 슈퍼큐브777 하이파이 에디션 블루투스 노래방,SuperCube777,SuperCube777,크림 베",
+      "start_date": "2025.03.28",
+      "areas": {
+        "비검색": {
+          "impressions": 887355.0,
+          "clicks": 546.0,
+          "spend": 214384.0,
+          "orders": 20.0,
+          "qty": 20.0,
+          "revenue": 1647520.0,
+          "ctr": 0.0006153117974204236,
+          "cvr": 0.03663003663003663,
+          "cpc": 392.64468864468864,
+          "cpa": 10719.2,
+          "roas": 7.684901858347638
+        },
+        "검색": {
+          "impressions": 749.0,
+          "clicks": 68.0,
+          "spend": 53603.0,
+          "orders": 3.0,
+          "qty": 3.0,
+          "revenue": 260340.0,
+          "ctr": 0.09078771695594126,
+          "cvr": 0.04411764705882353,
+          "cpc": 788.2794117647059,
+          "cpa": 17867.666666666668,
+          "roas": 4.856817715426375
+        }
+      },
+      "total": {
+        "impressions": 888104.0,
+        "clicks": 614.0,
+        "spend": 267987.0,
+        "orders": 23.0,
+        "qty": 23.0,
+        "revenue": 1907860.0,
+        "ctr": 0.0006913604712961545,
+        "cvr": 0.03745928338762215,
+        "cpc": 436.46091205211724,
+        "cpa": 11651.608695652174,
+        "roas": 7.119225932601208
+      },
+      "keywords": [
+        {
+          "keyword": "디큐브 슈퍼큐브777",
+          "area": "검색",
+          "impressions": 25.0,
+          "clicks": 7.0,
+          "spend": 3383.0,
+          "orders": 1.0,
+          "revenue": 85440.0,
+          "ctr": 0.28,
+          "cvr": 0.14285714285714285,
+          "cpc": 483.2857142857143,
+          "cpa": 3383.0,
+          "roas": 25.255690215784806
+        },
+        {
+          "keyword": "휴대용 마이크 스피커 세트",
+          "area": "검색",
+          "impressions": 67.0,
+          "clicks": 3.0,
+          "spend": 7109.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.04477611940298507,
+          "cvr": 0.0,
+          "cpc": 2369.6666666666665,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가라오케",
+          "area": "검색",
+          "impressions": 74.0,
+          "clicks": 2.0,
+          "spend": 211.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02702702702702703,
+          "cvr": 0.0,
+          "cpc": 105.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "블루투스 스피커 25w",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 2.0,
+          "spend": 4503.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.6666666666666666,
+          "cvr": 0.0,
+          "cpc": 2251.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "C타입 휴대용 앰프 마이크 & 스피커",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 2483.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 2483.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "SUPERCUBE",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "Soundcore 3",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 1693.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 1693.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "Supercube",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "c타입블루투스마이크",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "edifier",
+          "area": "검색",
+          "impressions": 4.0,
+          "clicks": 1.0,
+          "spend": 1143.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.25,
+          "cvr": 0.0,
+          "cpc": 1143.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "jbl 블루투스 스피커마이크",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "jbl블루투스스피커",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 1.0,
+          "spend": 620.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.07692307692307693,
+          "cvr": 0.0,
+          "cpc": 620.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "karaoke bluetooth speaker",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 1.0,
+          "spend": 315.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 315.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "m200블루투스 마이크",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 1441.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 1441.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "microphone karaoke",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 1824.0,
+          "orders": 1.0,
+          "revenue": 85900.0,
+          "ctr": 0.5,
+          "cvr": 1.0,
+          "cpc": 1824.0,
+          "cpa": 1824.0,
+          "roas": 47.094298245614034
+        },
+        {
+          "keyword": "mr3",
+          "area": "검색",
+          "impressions": 127.0,
+          "clicks": 1.0,
+          "spend": 159.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.007874015748031496,
+          "cvr": 0.0,
+          "cpc": 159.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "tj 노래방 마이크",
+          "area": "검색",
+          "impressions": 12.0,
+          "clicks": 1.0,
+          "spend": 603.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.08333333333333333,
+          "cvr": 0.0,
+          "cpc": 603.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가정용 오디오세트",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 528.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 528.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노래방 마이크 다이나믹",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 1342.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 1342.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노래방마이크세트",
+          "area": "검색",
+          "impressions": 4.0,
+          "clicks": 1.0,
+          "spend": 263.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.25,
+          "cvr": 0.0,
+          "cpc": 263.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104302260,
+      "name": "일월 올리브그레이 탄소매트 매출 최적화_251021",
+      "short_name": "일월 올리브그레이 탄소매트 매출 최적화_251021",
+      "type": "매출 최적화",
+      "product": "일월 탄소매트 전자파없는 전기요 워셔블 카본매트 초절전 59W,{\"일월 올리브그레이 탄소매트\":\"더블(140",
+      "start_date": "2025.10.21",
+      "areas": {
+        "비검색": {
+          "impressions": 172370.0,
+          "clicks": 60.0,
+          "spend": 38360.0,
+          "orders": 3.0,
+          "qty": 3.0,
+          "revenue": 204380.0,
+          "ctr": 0.00034808841445727214,
+          "cvr": 0.05,
+          "cpc": 639.3333333333334,
+          "cpa": 12786.666666666666,
+          "roas": 5.327945776850886
+        },
+        "검색": {
+          "impressions": 2477.0,
+          "clicks": 135.0,
+          "spend": 229224.0,
+          "orders": 14.0,
+          "qty": 15.0,
+          "revenue": 1016660.0,
+          "ctr": 0.05450141299959629,
+          "cvr": 0.1037037037037037,
+          "cpc": 1697.9555555555555,
+          "cpa": 16373.142857142857,
+          "roas": 4.435224932816808
+        }
+      },
+      "total": {
+        "impressions": 174847.0,
+        "clicks": 195.0,
+        "spend": 267584.0,
+        "orders": 17.0,
+        "qty": 18.0,
+        "revenue": 1221040.0,
+        "ctr": 0.0011152607708453677,
+        "cvr": 0.08717948717948718,
+        "cpc": 1372.225641025641,
+        "cpa": 15740.235294117647,
+        "roas": 4.563202583114087
+      },
+      "keywords": [
+        {
+          "keyword": "일월 카본매트 더블",
+          "area": "검색",
+          "impressions": 413.0,
+          "clicks": 31.0,
+          "spend": 46192.0,
+          "orders": 4.0,
+          "revenue": 270760.0,
+          "ctr": 0.07506053268765134,
+          "cvr": 0.12903225806451613,
+          "cpc": 1490.0645161290322,
+          "cpa": 11548.0,
+          "roas": 5.861621059923796
+        },
+        {
+          "keyword": "일월 전기매트",
+          "area": "검색",
+          "impressions": 370.0,
+          "clicks": 9.0,
+          "spend": 11978.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.024324324324324326,
+          "cvr": 0.0,
+          "cpc": 1330.888888888889,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 전기매트 2인용",
+          "area": "검색",
+          "impressions": 160.0,
+          "clicks": 6.0,
+          "spend": 13275.0,
+          "orders": 3.0,
+          "revenue": 203070.0,
+          "ctr": 0.0375,
+          "cvr": 0.5,
+          "cpc": 2212.5,
+          "cpa": 4425.0,
+          "roas": 15.297175141242938
+        },
+        {
+          "keyword": "전기장판 2인용",
+          "area": "검색",
+          "impressions": 442.0,
+          "clicks": 6.0,
+          "spend": 9964.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.013574660633484163,
+          "cvr": 0.0,
+          "cpc": 1660.6666666666667,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 매트 더블",
+          "area": "검색",
+          "impressions": 41.0,
+          "clicks": 5.0,
+          "spend": 12083.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.12195121951219512,
+          "cvr": 0.0,
+          "cpc": 2416.6,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 카본매트",
+          "area": "검색",
+          "impressions": 96.0,
+          "clicks": 5.0,
+          "spend": 7616.0,
+          "orders": 1.0,
+          "revenue": 67690.0,
+          "ctr": 0.052083333333333336,
+          "cvr": 0.2,
+          "cpc": 1523.2,
+          "cpa": 7616.0,
+          "roas": 8.887867647058824
+        },
+        {
+          "keyword": "일월 탄소매트",
+          "area": "검색",
+          "impressions": 69.0,
+          "clicks": 5.0,
+          "spend": 8427.0,
+          "orders": 1.0,
+          "revenue": 67690.0,
+          "ctr": 0.07246376811594203,
+          "cvr": 0.2,
+          "cpc": 1685.4,
+          "cpa": 8427.0,
+          "roas": 8.03251453660852
+        },
+        {
+          "keyword": "일월전기매트",
+          "area": "검색",
+          "impressions": 147.0,
+          "clicks": 5.0,
+          "spend": 5936.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.034013605442176874,
+          "cvr": 0.0,
+          "cpc": 1187.2,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 전기매트 2인용 분리난방",
+          "area": "검색",
+          "impressions": 23.0,
+          "clicks": 3.0,
+          "spend": 1780.0,
+          "orders": 1.0,
+          "revenue": 67690.0,
+          "ctr": 0.13043478260869565,
+          "cvr": 0.3333333333333333,
+          "cpc": 593.3333333333334,
+          "cpa": 1780.0,
+          "roas": 38.02808988764045
+        },
+        {
+          "keyword": "일월카본매트",
+          "area": "검색",
+          "impressions": 58.0,
+          "clicks": 3.0,
+          "spend": 2983.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.05172413793103448,
+          "cvr": 0.0,
+          "cpc": 994.3333333333334,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월카본전기매트 2인용",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 3.0,
+          "spend": 5508.0,
+          "orders": 1.0,
+          "revenue": 135380.0,
+          "ctr": 0.23076923076923078,
+          "cvr": 0.3333333333333333,
+          "cpc": 1836.0,
+          "cpa": 5508.0,
+          "roas": 24.578794480755263
+        },
+        {
+          "keyword": "ILWOUL",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 2.0,
+          "spend": 18163.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.15384615384615385,
+          "cvr": 0.0,
+          "cpc": 9081.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 emf 탄소매트",
+          "area": "검색",
+          "impressions": 13.0,
+          "clicks": 2.0,
+          "spend": 4120.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.15384615384615385,
+          "cvr": 0.0,
+          "cpc": 2060.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월 전기매트 블로썸 카본 탄소매트 전기요 전기장판 더블 2color",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 2.0,
+          "spend": 980.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.4,
+          "cvr": 0.0,
+          "cpc": 490.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "일월전기매트2인용",
+          "area": "검색",
+          "impressions": 16.0,
+          "clicks": 2.0,
+          "spend": 4682.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.125,
+          "cvr": 0.0,
+          "cpc": 2341.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "전기요 2인용",
+          "area": "검색",
+          "impressions": 47.0,
+          "clicks": 2.0,
+          "spend": 5126.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.0425531914893617,
+          "cvr": 0.0,
+          "cpc": 2563.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "카본매트",
+          "area": "검색",
+          "impressions": 58.0,
+          "clicks": 2.0,
+          "spend": 3566.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.034482758620689655,
+          "cvr": 0.0,
+          "cpc": 1783.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "카본전기매트 2인용",
+          "area": "검색",
+          "impressions": 52.0,
+          "clicks": 2.0,
+          "spend": 1288.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.038461538461538464,
+          "cvr": 0.0,
+          "cpc": 644.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "[일월] 핑크스페이드 초절전형 워셔블 카본 탄소 전기매트",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 164.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 164.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "dc 카본매트",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 1.0,
+          "spend": 290.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 290.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104752707,
+      "name": "쿠랩계란찜기_비검색_400_0319",
+      "short_name": "쿠랩계란찜기_비검색_400_0319",
+      "type": "수동 성과형",
+      "product": "쿠랩 프리미엄 스텐 계란찜기,1단 1+1,1단 1+1",
+      "start_date": "2026.03.19",
+      "areas": {
+        "비검색": {
+          "impressions": 1976046.0,
+          "clicks": 1484.0,
+          "spend": 217326.0,
+          "orders": 3.0,
+          "qty": 3.0,
+          "revenue": 164300.0,
+          "ctr": 0.0007509946630797057,
+          "cvr": 0.0020215633423180594,
+          "cpc": 146.44609164420484,
+          "cpa": 72442.0,
+          "roas": 0.7560071045342021
+        }
+      },
+      "total": {
+        "impressions": 1976046.0,
+        "clicks": 1484.0,
+        "spend": 217326.0,
+        "orders": 3.0,
+        "qty": 3.0,
+        "revenue": 164300.0,
+        "ctr": 0.0007509946630797057,
+        "cvr": 0.0020215633423180594,
+        "cpc": 146.44609164420484,
+        "cpa": 72442.0,
+        "roas": 0.7560071045342021
+      },
+      "keywords": []
+    },
+    {
+      "id": 103620769,
+      "name": "보풀제거기(최적화1000_메인브랜드키워드 제외)_0318",
+      "short_name": "보풀제거기(최적화1000_메인브랜드키워드 제외)_0318",
+      "type": "매출 최적화",
+      "product": "디큐브 보풀제거기 휴대용 충전식 6중날 2000mAh 3단조절 (추가날 증정, 박스 속에 총 2개 칼날 포장",
+      "start_date": "2025.03.18",
+      "areas": {
+        "비검색": {
+          "impressions": 219914.0,
+          "clicks": 93.0,
+          "spend": 67226.0,
+          "orders": 5.0,
+          "qty": 5.0,
+          "revenue": 108000.0,
+          "ctr": 0.00042289258528333803,
+          "cvr": 0.053763440860215055,
+          "cpc": 722.8602150537635,
+          "cpa": 13445.2,
+          "roas": 1.6065212864070448
+        },
+        "검색": {
+          "impressions": 7140.0,
+          "clicks": 70.0,
+          "spend": 134749.0,
+          "orders": 7.0,
+          "qty": 8.0,
+          "revenue": 172800.0,
+          "ctr": 0.00980392156862745,
+          "cvr": 0.1,
+          "cpc": 1924.9857142857143,
+          "cpa": 19249.85714285714,
+          "roas": 1.2823842848555462
+        }
+      },
+      "total": {
+        "impressions": 227054.0,
+        "clicks": 163.0,
+        "spend": 201975.0,
+        "orders": 12.0,
+        "qty": 13.0,
+        "revenue": 280800.0,
+        "ctr": 0.0007178908982004281,
+        "cvr": 0.0736196319018405,
+        "cpc": 1239.1104294478528,
+        "cpa": 16831.25,
+        "roas": 1.390271073152618
+      },
+      "keywords": [
+        {
+          "keyword": "보풀제거기",
+          "area": "검색",
+          "impressions": 2679.0,
+          "clicks": 19.0,
+          "spend": 41683.0,
+          "orders": 2.0,
+          "revenue": 43200.0,
+          "ctr": 0.0070921985815602835,
+          "cvr": 0.10526315789473684,
+          "cpc": 2193.842105263158,
+          "cpa": 20841.5,
+          "roas": 1.0363937336564066
+        },
+        {
+          "keyword": "보풀제거기 1위",
+          "area": "검색",
+          "impressions": 1400.0,
+          "clicks": 18.0,
+          "spend": 27511.0,
+          "orders": 2.0,
+          "revenue": 64800.0,
+          "ctr": 0.012857142857142857,
+          "cvr": 0.1111111111111111,
+          "cpc": 1528.388888888889,
+          "cpa": 13755.5,
+          "roas": 2.3554214677765257
+        },
+        {
+          "keyword": "보풀제거기",
+          "area": "검색",
+          "impressions": 1528.0,
+          "clicks": 11.0,
+          "spend": 21760.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.007198952879581152,
+          "cvr": 0.0,
+          "cpc": 1978.1818181818182,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "충전식 보풀제거기",
+          "area": "검색",
+          "impressions": 805.0,
+          "clicks": 4.0,
+          "spend": 11196.0,
+          "orders": 1.0,
+          "revenue": 21600.0,
+          "ctr": 0.004968944099378882,
+          "cvr": 0.25,
+          "cpc": 2799.0,
+          "cpa": 11196.0,
+          "roas": 1.9292604501607717
+        },
+        {
+          "keyword": "디큐브 보풀제거기",
+          "area": "검색",
+          "impressions": 122.0,
+          "clicks": 3.0,
+          "spend": 1552.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.02459016393442623,
+          "cvr": 0.0,
+          "cpc": 517.3333333333334,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "디큐브",
+          "area": "검색",
+          "impressions": 87.0,
+          "clicks": 2.0,
+          "spend": 1305.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.022988505747126436,
+          "cvr": 0.0,
+          "cpc": 652.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "디큐브 보풀제거기",
+          "area": "검색",
+          "impressions": 30.0,
+          "clicks": 2.0,
+          "spend": 4952.0,
+          "orders": 1.0,
+          "revenue": 21600.0,
+          "ctr": 0.06666666666666667,
+          "cvr": 0.5,
+          "cpc": 2476.0,
+          "cpa": 4952.0,
+          "roas": 4.361873990306947
+        },
+        {
+          "keyword": "보풀 제거기",
+          "area": "검색",
+          "impressions": 83.0,
+          "clicks": 2.0,
+          "spend": 8770.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.024096385542168676,
+          "cvr": 0.0,
+          "cpc": 4385.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "보풀제거기 1위",
+          "area": "검색",
+          "impressions": 202.0,
+          "clicks": 2.0,
+          "spend": 3816.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.009900990099009901,
+          "cvr": 0.0,
+          "cpc": 1908.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "국산 보풀제거기",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 175.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 175.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "국산 보풀제거기 1위",
+          "area": "검색",
+          "impressions": 27.0,
+          "clicks": 1.0,
+          "spend": 1513.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.037037037037037035,
+          "cvr": 0.0,
+          "cpc": 1513.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "디큐브 보풀제거기 휴대용 충전식 6중날 2000mAh",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 3234.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 3234.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "보풀 제거기",
+          "area": "검색",
+          "impressions": 169.0,
+          "clicks": 1.0,
+          "spend": 2876.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.005917159763313609,
+          "cvr": 0.0,
+          "cpc": 2876.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "실크웨이브보풀",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 2352.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 2352.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "옷 보풀제거기 1위세탁소국산",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 911.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 911.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "옷 보풀제거기 디큐브",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 1143.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 1143.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 103691807,
+      "name": "k1010(최적화)_0408",
+      "short_name": "k1010(최적화)_0408",
+      "type": "매출 최적화",
+      "product": "집에서 즐기는 홈파티 블루투스 노래방 K1010 20W 고출력 리얼 스피커 사운드,{\"사은품\":\"K1010블",
+      "start_date": "2025.04.08",
+      "areas": {
+        "비검색": {
+          "impressions": 427305.0,
+          "clicks": 244.0,
+          "spend": 84683.0,
+          "orders": 2.0,
+          "qty": 2.0,
+          "revenue": 218000.0,
+          "ctr": 0.0005710206995003569,
+          "cvr": 0.00819672131147541,
+          "cpc": 347.0614754098361,
+          "cpa": 42341.5,
+          "roas": 2.5743065314171676
+        },
+        "검색": {
+          "impressions": 367.0,
+          "clicks": 46.0,
+          "spend": 19359.0,
+          "orders": 0.0,
+          "qty": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.12534059945504086,
+          "cvr": 0.0,
+          "cpc": 420.8478260869565,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      },
+      "total": {
+        "impressions": 427672.0,
+        "clicks": 290.0,
+        "spend": 104042.0,
+        "orders": 2.0,
+        "qty": 2.0,
+        "revenue": 218000.0,
+        "ctr": 0.0006780897510241493,
+        "cvr": 0.006896551724137931,
+        "cpc": 358.7655172413793,
+        "cpa": 52021.0,
+        "roas": 2.0953076642125295
+      },
+      "keywords": [
+        {
+          "keyword": "비즈노래방",
+          "area": "검색",
+          "impressions": 62.0,
+          "clicks": 3.0,
+          "spend": 414.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.04838709677419355,
+          "cvr": 0.0,
+          "cpc": 138.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "2026 쏘렌토 노래방",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 2.0,
+          "spend": 285.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.6666666666666666,
+          "cvr": 0.0,
+          "cpc": 142.5,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "120w 노래방 스피커",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 272.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 272.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "BZ-K1010C",
+          "area": "검색",
+          "impressions": 8.0,
+          "clicks": 1.0,
+          "spend": 313.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.125,
+          "cvr": 0.0,
+          "cpc": 313.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "IMK-M7",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "K1010C",
+          "area": "검색",
+          "impressions": 4.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.25,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "K10plus speaker",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "bluetooth speaker with mic",
+          "area": "검색",
+          "impressions": 25.0,
+          "clicks": 1.0,
+          "spend": 340.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.04,
+          "cvr": 0.0,
+          "cpc": 340.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "bluetooth speaker with mike",
+          "area": "검색",
+          "impressions": 21.0,
+          "clicks": 1.0,
+          "spend": 215.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.047619047619047616,
+          "cvr": 0.0,
+          "cpc": 215.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "jbl chargeable microphone",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "jbl karaoke speaker with mic",
+          "area": "검색",
+          "impressions": 36.0,
+          "clicks": 1.0,
+          "spend": 435.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.027777777777777776,
+          "cvr": 0.0,
+          "cpc": 435.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "jyx 휴대용 블루투스 노래방 기계 스피커 듀얼 무선 마이크 세트",
+          "area": "검색",
+          "impressions": 8.0,
+          "clicks": 1.0,
+          "spend": 1384.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.125,
+          "cvr": 0.0,
+          "cpc": 1384.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "karaoke set",
+          "area": "검색",
+          "impressions": 26.0,
+          "clicks": 1.0,
+          "spend": 1115.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.038461538461538464,
+          "cvr": 0.0,
+          "cpc": 1115.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "karaoke sound mixer speaker",
+          "area": "검색",
+          "impressions": 12.0,
+          "clicks": 1.0,
+          "spend": 473.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.08333333333333333,
+          "cvr": 0.0,
+          "cpc": 473.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "koraoke mice speaker jbl",
+          "area": "검색",
+          "impressions": 10.0,
+          "clicks": 1.0,
+          "spend": 101.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.1,
+          "cvr": 0.0,
+          "cpc": 101.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "moncross switzerland speaker",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 122.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 122.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "sound box",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.3333333333333333,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가정용노래방기계",
+          "area": "검색",
+          "impressions": 20.0,
+          "clicks": 1.0,
+          "spend": 301.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.05,
+          "cvr": 0.0,
+          "cpc": 301.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "가정용노래방반주기 스피커m-party",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 1.0,
+          "spend": 322.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 322.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "고출력 블루투스 마이크",
+          "area": "검색",
+          "impressions": 8.0,
+          "clicks": 1.0,
+          "spend": 535.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.125,
+          "cvr": 0.0,
+          "cpc": 535.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104544887,
+      "name": "보풀제거기 비검색 100원 12.29",
+      "short_name": "보풀제거기 비검색 100원 12.29",
+      "type": "수동 성과형",
+      "product": "맥세이프 노터치 차량용 무선 충전 핸드폰 거치대,{\"상품선택\":\"맥세이프 A5 차량용 무선충전거치대\"},{\"",
+      "start_date": "2025.12.29",
+      "areas": {
+        "비검색": {
+          "impressions": 149613.0,
+          "clicks": 164.0,
+          "spend": 24989.0,
+          "orders": 3.0,
+          "qty": 3.0,
+          "revenue": 81450.0,
+          "ctr": 0.0010961614298222748,
+          "cvr": 0.018292682926829267,
+          "cpc": 152.3719512195122,
+          "cpa": 8329.666666666666,
+          "roas": 3.2594341510264515
+        },
+        "검색": {
+          "impressions": 84.0,
+          "clicks": 10.0,
+          "spend": 1065.0,
+          "orders": 1.0,
+          "qty": 1.0,
+          "revenue": 29700.0,
+          "ctr": 0.11904761904761904,
+          "cvr": 0.1,
+          "cpc": 106.5,
+          "cpa": 1065.0,
+          "roas": 27.887323943661972
+        }
+      },
+      "total": {
+        "impressions": 149697.0,
+        "clicks": 174.0,
+        "spend": 26054.0,
+        "orders": 4.0,
+        "qty": 4.0,
+        "revenue": 111150.0,
+        "ctr": 0.001162347942844546,
+        "cvr": 0.022988505747126436,
+        "cpc": 149.73563218390805,
+        "cpa": 6513.5,
+        "roas": 4.2661395563061335
+      },
+      "keywords": [
+        {
+          "keyword": "17인치 노트북 거치대",
+          "area": "검색",
+          "impressions": 11.0,
+          "clicks": 1.0,
+          "spend": 110.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.09090909090909091,
+          "cvr": 0.0,
+          "cpc": 110.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "17인치 노트북 알루미늄",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노트북 거치대",
+          "area": "검색",
+          "impressions": 56.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.017857142857142856,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노트북 거치대 usb허브",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 110.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 110.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노트북 거치대 usb허브",
+          "area": "검색",
+          "impressions": 5.0,
+          "clicks": 1.0,
+          "spend": 110.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.2,
+          "cvr": 0.0,
+          "cpc": 110.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "노트북 열방지 받침대 허브",
+          "area": "검색",
+          "impressions": 3.0,
+          "clicks": 1.0,
+          "spend": 110.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.3333333333333333,
+          "cvr": 0.0,
+          "cpc": 110.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "와이드 노트북 거치대",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 100.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 100.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "와이드 노트북 거치대",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 110.0,
+          "orders": 1.0,
+          "revenue": 29700.0,
+          "ctr": 1.0,
+          "cvr": 1.0,
+          "cpc": 110.0,
+          "cpa": 110.0,
+          "roas": 270.0
+        },
+        {
+          "keyword": "이중 옷",
+          "area": "검색",
+          "impressions": 1.0,
+          "clicks": 1.0,
+          "spend": 105.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 1.0,
+          "cvr": 0.0,
+          "cpc": 105.0,
+          "cpa": 0,
+          "roas": 0.0
+        },
+        {
+          "keyword": "접이식 노트북 받침대 usb 포트",
+          "area": "검색",
+          "impressions": 2.0,
+          "clicks": 1.0,
+          "spend": 110.0,
+          "orders": 0.0,
+          "revenue": 0.0,
+          "ctr": 0.5,
+          "cvr": 0.0,
+          "cpc": 110.0,
+          "cpa": 0,
+          "roas": 0.0
+        }
+      ]
+    },
+    {
+      "id": 104501294,
+      "name": "코잠 비검색 120원 12.12 테스트",
+      "short_name": "코잠 비검색 120원 12.12 테스트",
+      "type": "수동 성과형",
+      "product": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요,단일색상,단일색상,1",
+      "start_date": "2025.12.14",
+      "areas": {
+        "비검색": {
+          "impressions": 948902.0,
+          "clicks": 219.0,
+          "spend": 25935.0,
+          "orders": 2.0,
+          "qty": 2.0,
+          "revenue": 111020.0,
+          "ctr": 0.00023079306398342506,
+          "cvr": 0.0091324200913242,
+          "cpc": 118.42465753424658,
+          "cpa": 12967.5,
+          "roas": 4.280701754385965
+        }
+      },
+      "total": {
+        "impressions": 948902.0,
+        "clicks": 219.0,
+        "spend": 25935.0,
+        "orders": 2.0,
+        "qty": 2.0,
+        "revenue": 111020.0,
+        "ctr": 0.00023079306398342506,
+        "cvr": 0.0091324200913242,
+        "cpc": 118.42465753424658,
+        "cpa": 12967.5,
+        "roas": 4.280701754385965
+      },
+      "keywords": []
+    }
+  ],
+  "products": [
+    {
+      "opt_id": "93418592679",
+      "opt_name": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인, 볼펜녹음기 단품",
+      "prod_name": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인",
+      "category": "가전/디지털",
+      "revenue": 19734000.0,
+      "orders": 279.0,
+      "qty": 286.0,
+      "cvr": 0,
+      "winner": 99.9,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93180158199",
+      "opt_name": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴, 서바이복스 단품",
+      "prod_name": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴",
+      "category": "가전/디지털",
+      "revenue": 14436100.0,
+      "orders": 274.0,
+      "qty": 293.0,
+      "cvr": 0,
+      "winner": 92.8,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94774985997",
+      "opt_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건, 다크그린, 16헤드",
+      "prod_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건",
+      "category": "가전/디지털",
+      "revenue": 7900000.0,
+      "orders": 100.0,
+      "qty": 100.0,
+      "cvr": 0,
+      "winner": 99.8,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "82986112131",
+      "opt_name": "집에서도 즐기는 LED파티 회전 미러볼 사운드 반응형 + 리모컨 파티는 조명빨, PARTY…",
+      "prod_name": "집에서도 즐기는 LED파티 회전 미러볼 사운드 반응형 + 리모컨 파티는 조명빨",
+      "category": "문구/오피스",
+      "revenue": 3612000.0,
+      "orders": 249.0,
+      "qty": 280.0,
+      "cvr": 0,
+      "winner": 99.8,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "91060462717",
+      "opt_name": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요, …",
+      "prod_name": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요",
+      "category": "가전/디지털",
+      "revenue": 1552200.0,
+      "orders": 26.0,
+      "qty": 26.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94933838134",
+      "opt_name": "쿠랩 프리미엄 스텐 계란찜기, 2단",
+      "prod_name": "쿠랩 프리미엄 스텐 계란찜기",
+      "category": "가전/디지털",
+      "revenue": 1472600.0,
+      "orders": 37.0,
+      "qty": 37.0,
+      "cvr": 0,
+      "winner": 97.1,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "91060462724",
+      "opt_name": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요, …",
+      "prod_name": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요",
+      "category": "가전/디지털",
+      "revenue": 1077720.0,
+      "orders": 20.0,
+      "qty": 21.0,
+      "cvr": 0,
+      "winner": 80.8,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94776475380",
+      "opt_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건, 다크그린, 16헤드+…",
+      "prod_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건",
+      "category": "가전/디지털",
+      "revenue": 1056000.0,
+      "orders": 12.0,
+      "qty": 12.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93418592676",
+      "opt_name": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인, 볼펜녹음기 1+1",
+      "prod_name": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인",
+      "category": "가전/디지털",
+      "revenue": 1024000.0,
+      "orders": 8.0,
+      "qty": 8.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93618900759",
+      "opt_name": "일월 탄소매트 전자파없는 전기요 워셔블 카본매트 초절전 59W, 더블(140x180)",
+      "prod_name": "일월 탄소매트 전자파없는 전기요 워셔블 카본매트 초절전 59W",
+      "category": "가전/디지털",
+      "revenue": 1015350.0,
+      "orders": 14.0,
+      "qty": 15.0,
+      "cvr": 0,
+      "winner": 84.4,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93180158072",
+      "opt_name": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴, 서바이복스 단품",
+      "prod_name": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴",
+      "category": "가전/디지털",
+      "revenue": 994000.0,
+      "orders": 20.0,
+      "qty": 20.0,
+      "cvr": 0,
+      "winner": 16.7,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93691016486",
+      "opt_name": "디큐브 계란찜기 올스텐 SUS 304 세라믹코팅 + 계란집게 증정, EGOGO 1단(7구)…",
+      "prod_name": "디큐브 계란찜기 올스텐 SUS 304 세라믹코팅 + 계란집게 증정",
+      "category": "가전/디지털",
+      "revenue": 829400.0,
+      "orders": 26.0,
+      "qty": 26.0,
+      "cvr": 0,
+      "winner": 99.7,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93180158138",
+      "opt_name": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴, 서바이복스 1+1",
+      "prod_name": "서바이복스 휴대용 재난용 라디오 크랭크 자가발전 태양열 LED랜턴",
+      "category": "가전/디지털",
+      "revenue": 752200.0,
+      "orders": 8.0,
+      "qty": 8.0,
+      "cvr": 0,
+      "winner": 79.3,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94774985993",
+      "opt_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건, 다크그린, 8헤드",
+      "prod_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건",
+      "category": "가전/디지털",
+      "revenue": 690000.0,
+      "orders": 10.0,
+      "qty": 10.0,
+      "cvr": 0,
+      "winner": 99.7,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93498753715",
+      "opt_name": "디큐브 거꾸로 물멍 무드등 가습기, 딥그린 - 단품",
+      "prod_name": "디큐브 거꾸로 물멍 무드등 가습기",
+      "category": "가전/디지털",
+      "revenue": 683100.0,
+      "orders": 23.0,
+      "qty": 23.0,
+      "cvr": 0,
+      "winner": 99.9,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93498753731",
+      "opt_name": "디큐브 거꾸로 물멍 무드등 가습기, 샌드 베이지 - 단품",
+      "prod_name": "디큐브 거꾸로 물멍 무드등 가습기",
+      "category": "가전/디지털",
+      "revenue": 623700.0,
+      "orders": 21.0,
+      "qty": 21.0,
+      "cvr": 0,
+      "winner": 98.9,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93498753726",
+      "opt_name": "디큐브 거꾸로 물멍 무드등 가습기, 스노우 화이트 - 단품",
+      "prod_name": "디큐브 거꾸로 물멍 무드등 가습기",
+      "category": "가전/디지털",
+      "revenue": 594000.0,
+      "orders": 20.0,
+      "qty": 20.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93537965484",
+      "opt_name": "디큐브 플렉시젠 189g 초경량 4포트 멀티 허브 노트북 거치대, 플렉시젠 H(허브) - …",
+      "prod_name": "디큐브 플렉시젠 189g 초경량 4포트 멀티 허브 노트북 거치대",
+      "category": "가전/디지털",
+      "revenue": 474000.0,
+      "orders": 12.0,
+      "qty": 12.0,
+      "cvr": 0,
+      "winner": 98.5,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94933838135",
+      "opt_name": "쿠랩 프리미엄 스텐 계란찜기, 1단",
+      "prod_name": "쿠랩 프리미엄 스텐 계란찜기",
+      "category": "가전/디지털",
+      "revenue": 453700.0,
+      "orders": 13.0,
+      "qty": 13.0,
+      "cvr": 0,
+      "winner": 99.9,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "83526989794",
+      "opt_name": "집에서 즐기는 홈파티 블루투스 노래방 K1010 20W 고출력 리얼 스피커 사운드, K10…",
+      "prod_name": "집에서 즐기는 홈파티 블루투스 노래방 K1010 20W 고출력 리얼 스피커 사운드",
+      "category": "가전/디지털",
+      "revenue": 436000.0,
+      "orders": 4.0,
+      "qty": 4.0,
+      "cvr": 0,
+      "winner": 99.2,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94865295178",
+      "opt_name": "쿠랩 프리미엄 스텐 계란찜기, 2단 1+1",
+      "prod_name": "쿠랩 프리미엄 스텐 계란찜기",
+      "category": "가전/디지털",
+      "revenue": 348000.0,
+      "orders": 5.0,
+      "qty": 5.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "87478214965",
+      "opt_name": "일월 분리난방 emf인증 프리미엄 텐셀 유칼립투스 카본매트 전자파차단 99.9% 탄소매트,…",
+      "prod_name": "일월 분리난방 emf인증 프리미엄 텐셀 유칼립투스 카본매트 전자파차단 99.9% 탄소매트",
+      "category": "가전/디지털",
+      "revenue": 262860.0,
+      "orders": 2.0,
+      "qty": 2.0,
+      "cvr": 0,
+      "winner": 99.4,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93537902399",
+      "opt_name": "디큐브 플렉시젠 139g 초경량 17인치 노트북 거치대",
+      "prod_name": "디큐브 플렉시젠 139g 초경량 17인치 노트북 거치대",
+      "category": "가전/디지털",
+      "revenue": 237600.0,
+      "orders": 8.0,
+      "qty": 8.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94776475374",
+      "opt_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건, 다크그린, 8헤드+벨…",
+      "prod_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건",
+      "category": "가전/디지털",
+      "revenue": 234000.0,
+      "orders": 3.0,
+      "qty": 3.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "91672935207",
+      "opt_name": "디큐브 보풀제거기 휴대용 충전식 6중날 2000mAh 3단조절 (추가날 증정 박스 속에 총…",
+      "prod_name": "디큐브 보풀제거기 휴대용 충전식 6중날 2000mAh 3단조절 (추가날 증정 박스 속에 총…",
+      "category": "가전/디지털",
+      "revenue": 216000.0,
+      "orders": 9.0,
+      "qty": 10.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93618900757",
+      "opt_name": "일월 탄소매트 전자파없는 전기요 워셔블 카본매트 초절전 59W, 싱글(90x180)",
+      "prod_name": "일월 탄소매트 전자파없는 전기요 워셔블 카본매트 초절전 59W",
+      "category": "가전/디지털",
+      "revenue": 207000.0,
+      "orders": 3.0,
+      "qty": 3.0,
+      "cvr": 0,
+      "winner": 87.3,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94776475375",
+      "opt_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건, 다크그린, 16헤드 …",
+      "prod_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건",
+      "category": "가전/디지털",
+      "revenue": 158000.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94096664464",
+      "opt_name": "디큐브 가정용 욕실 온풍기 무타공 벽걸이 PTC 저소음, 디큐브 욕실온풍기 단품",
+      "prod_name": "디큐브 가정용 욕실 온풍기 무타공 벽걸이 PTC 저소음",
+      "category": "가전/디지털",
+      "revenue": 149100.0,
+      "orders": 3.0,
+      "qty": 3.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93679722044",
+      "opt_name": "한일의료기 무선 진동 온열 허리마사지기+ 허리보호대, 코어 나이저 허리마사지 2개, 그레이…",
+      "prod_name": "한일의료기 무선 진동 온열 허리마사지기+ 허리보호대",
+      "category": "가전/디지털",
+      "revenue": 133000.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "85729395068",
+      "opt_name": "디큐브 슬림 초소형 녹음기 고품질 노이즈 캔슬링 음성 녹음 + OTG젠더, 슬림 레코더 1…",
+      "prod_name": "디큐브 슬림 초소형 녹음기 고품질 노이즈 캔슬링 음성 녹음 + OTG젠더",
+      "category": "가전/디지털",
+      "revenue": 126000.0,
+      "orders": 2.0,
+      "qty": 2.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "88800332080",
+      "opt_name": "더스트헌터 초경량 무선청소기 핸디형 100W 원룸청소기, 그로시 블랙",
+      "prod_name": "더스트헌터 초경량 무선청소기 핸디형 100W 원룸청소기",
+      "category": "가전/디지털",
+      "revenue": 119100.0,
+      "orders": 3.0,
+      "qty": 3.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "87662251338",
+      "opt_name": "디큐브 맥세이프 보조배터리 10000mAh +맥세이프링, 화이트",
+      "prod_name": "디큐브 맥세이프 보조배터리 10000mAh +맥세이프링",
+      "category": "가전/디지털",
+      "revenue": 94200.0,
+      "orders": 3.0,
+      "qty": 3.0,
+      "cvr": 0,
+      "winner": 88.6,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94865295175",
+      "opt_name": "쿠랩 프리미엄 스텐 계란찜기, 1단+계란집게",
+      "prod_name": "쿠랩 프리미엄 스텐 계란찜기",
+      "category": "가전/디지털",
+      "revenue": 87800.0,
+      "orders": 2.0,
+      "qty": 2.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "91672935211",
+      "opt_name": "디큐브 보풀제거기 휴대용 충전식 6중날 2000mAh 3단조절 (추가날 증정 박스 속에 총…",
+      "prod_name": "디큐브 보풀제거기 휴대용 충전식 6중날 2000mAh 3단조절 (추가날 증정 박스 속에 총…",
+      "category": "가전/디지털",
+      "revenue": 86400.0,
+      "orders": 4.0,
+      "qty": 4.0,
+      "cvr": 0,
+      "winner": 98.7,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "87869915805",
+      "opt_name": "디큐브 맥세이프 차량용 거치대 무선 충전기 15W, 1개, 누드 블랙",
+      "prod_name": "디큐브 맥세이프 차량용 거치대 무선 충전기 15W",
+      "category": "가전/디지털",
+      "revenue": 79200.0,
+      "orders": 4.0,
+      "qty": 4.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "85937421164",
+      "opt_name": "디큐브 USB 초소형 녹음기 고품질 노이즈 캔슬링 원터치 음성 녹음, USB 녹음기 32G…",
+      "prod_name": "디큐브 USB 초소형 녹음기 고품질 노이즈 캔슬링 원터치 음성 녹음",
+      "category": "가전/디지털",
+      "revenue": 69000.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93418592674",
+      "opt_name": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인, 볼펜녹음기 단품",
+      "prod_name": "디큐브 C타입 볼펜녹음기 64GB 휴대폰에서 바로 확인",
+      "category": "가전/디지털",
+      "revenue": 69000.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 0.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94777020701",
+      "opt_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건, 다크그린, 벨트단품",
+      "prod_name": "와야 초강력 30단계 문어발 마사지기 근막 12mm 속근육 마사지건",
+      "category": "가전/디지털",
+      "revenue": 63000.0,
+      "orders": 7.0,
+      "qty": 7.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "84146477416",
+      "opt_name": "디큐브 초소형 동전 녹음기 최대 20시간 연속녹음 초경량 11g 7mm두께 고급알루미늄재질…",
+      "prod_name": "디큐브 초소형 동전 녹음기 최대 20시간 연속녹음 초경량 11g 7mm두께 고급알루미늄재질",
+      "category": "가전/디지털",
+      "revenue": 62900.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 99.3,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "89151235386",
+      "opt_name": "디큐브 USB 초소형 녹음기 고품질 노이즈 캔슬링 원터치 음성 녹음, USB 녹음기 8GB",
+      "prod_name": "디큐브 USB 초소형 녹음기 고품질 노이즈 캔슬링 원터치 음성 녹음",
+      "category": "가전/디지털",
+      "revenue": 59600.0,
+      "orders": 2.0,
+      "qty": 2.0,
+      "cvr": 0,
+      "winner": 81.5,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "91060462701",
+      "opt_name": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요, …",
+      "prod_name": "한일의료기 코잠 탄소매트 카본매트 전자파없는 워셔블 항균 전기매트 1인용 2인용 전기요",
+      "category": "가전/디지털",
+      "revenue": 54900.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 15.7,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94829386592",
+      "opt_name": "디큐브 애플 펜슬 1세대호환 충전 케이블 100CM (1M), 화이트, 1개",
+      "prod_name": "디큐브 애플 펜슬 1세대호환 충전 케이블 100CM (1M)",
+      "category": "가전/디지털",
+      "revenue": 54400.0,
+      "orders": 4.0,
+      "qty": 4.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94865295172",
+      "opt_name": "쿠랩 프리미엄 스텐 계란찜기, 2단",
+      "prod_name": "쿠랩 프리미엄 스텐 계란찜기",
+      "category": "가전/디지털",
+      "revenue": 49800.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 21.4,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "92430836421",
+      "opt_name": "한일의료기 설담 냉감패드 여름 이불패드 침대 수면 쿨패드 매트리스 깔개, 쿨매트, 슈퍼싱글…",
+      "prod_name": "한일의료기 설담 냉감패드 여름 이불패드 침대 수면 쿨패드 매트리스 깔개",
+      "category": "가구/홈데코",
+      "revenue": 47900.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 95.7,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "83123679533",
+      "opt_name": "베이식스 C타입 4포트 USB 3.0 2.0 무전원 허브 BU4C, 1개",
+      "prod_name": "베이식스 C타입 4포트 USB 3.0 2.0 무전원 허브 BU4C",
+      "category": "가전/디지털",
+      "revenue": 46400.0,
+      "orders": 3.0,
+      "qty": 4.0,
+      "cvr": 0,
+      "winner": 86.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94829371820",
+      "opt_name": "디큐브 애플 펜슬 1세대호환 충전 케이블 50CM, 화이트, 1개",
+      "prod_name": "디큐브 애플 펜슬 1세대호환 충전 케이블 50CM",
+      "category": "가전/디지털",
+      "revenue": 41200.0,
+      "orders": 3.0,
+      "qty": 4.0,
+      "cvr": 0,
+      "winner": 98.4,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "86292303989",
+      "opt_name": "디큐브 펼미 갤럭시 3in1 고속 무선 충전기, 블랙, 1개",
+      "prod_name": "디큐브 펼미 갤럭시 3in1 고속 무선 충전기",
+      "category": "가전/디지털",
+      "revenue": 39700.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 76.5,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "87660305059",
+      "opt_name": "5in1 23W 갤럭시 맥세이프 충전기 무선 S24 울트라 갤럭시워치 6 5, 매트블랙, …",
+      "prod_name": "5in1 23W 갤럭시 맥세이프 충전기 무선 S24 울트라 갤럭시워치 6 5",
+      "category": "가전/디지털",
+      "revenue": 39700.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "94716631006",
+      "opt_name": "맥세이프 3in1 무선 충전기 애플워치 아이폰 고속 충전기 se2 8 디큐브Sport41,…",
+      "prod_name": "맥세이프 3in1 무선 충전기 애플워치 아이폰 고속 충전기 se2 8 디큐브Sport41",
+      "category": "가전/디지털",
+      "revenue": 39600.0,
+      "orders": 2.0,
+      "qty": 2.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    },
+    {
+      "opt_id": "93537902387",
+      "opt_name": "디큐브 플렉시젠 139g 초경량 17인치 노트북 거치대, 플렉시젠 H(허브) - 그라파이트",
+      "prod_name": "디큐브 플렉시젠 139g 초경량 17인치 노트북 거치대",
+      "category": "가전/디지털",
+      "revenue": 39500.0,
+      "orders": 1.0,
+      "qty": 1.0,
+      "cvr": 0,
+      "winner": 100.0,
+      "cogs_input": true
+    }
+  ],
+  "product_totals": {
+    "revenue": 63211210.0,
+    "orders": 1283.0,
+    "qty": 1346.0
+  },
+  "insights": [
+    {
+      "campaign_id": 103620769,
+      "campaign_short": "보풀제거기(최적화1000_메인브랜드키워드 제외)_0318",
+      "code": "HIGH_CVR_LOW_ROAS",
+      "name": "승자의 저주",
+      "severity": "critical",
+      "priority": 9.2,
+      "detail": "전환율 7.4%로 우수하나 ROAS 139%로 마진 잠식 가능"
+    },
+    {
+      "campaign_id": 103620769,
+      "campaign_short": "보풀제거기(최적화1000_메인브랜드키워드 제외)_0318",
+      "code": "LOW_CTR_LOW_ROAS",
+      "name": "전면 재검토",
+      "severity": "critical",
+      "priority": 8.8,
+      "detail": "CTR 0.07%, ROAS 139% — 상품·타겟팅 재검토"
+    },
+    {
+      "campaign_id": 104626337,
+      "campaign_short": "플렉시젠_케이블 外 비검색 120원",
+      "code": "LOW_CTR_LOW_ROAS",
+      "name": "전면 재검토",
+      "severity": "critical",
+      "priority": 8.8,
+      "detail": "CTR 0.16%, ROAS 6% — 상품·타겟팅 재검토"
+    },
+    {
+      "campaign_id": 104752707,
+      "campaign_short": "쿠랩계란찜기_비검색_400_0319",
+      "code": "LOW_CTR_LOW_ROAS",
+      "name": "전면 재검토",
+      "severity": "critical",
+      "priority": 8.8,
+      "detail": "CTR 0.08%, ROAS 76% — 상품·타겟팅 재검토"
+    },
+    {
+      "campaign_id": 103088767,
+      "campaign_short": "한일 코잠매트 매출최적화 2024-0906 초기설정 제외 12.14 25…",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 1,320,929회인데 CTR 0.24% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 103620769,
+      "campaign_short": "보풀제거기(최적화1000_메인브랜드키워드 제외)_0318",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 227,054회인데 CTR 0.07% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 103655096,
+      "campaign_short": "로켓배송(슈퍼큐브777)_0328",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 888,104회인데 CTR 0.07% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 103691807,
+      "campaign_short": "k1010(최적화)_0408",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 427,672회인데 CTR 0.07% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 103773068,
+      "campaign_short": "애드마이저 테스트중",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 4,322,260회인데 CTR 0.06% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104302260,
+      "campaign_short": "일월 올리브그레이 탄소매트 매출 최적화_251021",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 174,847회인데 CTR 0.11% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104501294,
+      "campaign_short": "코잠 비검색 120원 12.12 테스트",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 948,902회인데 CTR 0.02% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104544887,
+      "campaign_short": "보풀제거기 비검색 100원 12.29",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 149,697회인데 CTR 0.12% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104626337,
+      "campaign_short": "플렉시젠_케이블 外 비검색 120원",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 1,472,517회인데 CTR 0.16% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104727976,
+      "campaign_short": "쿠랩 계란찜기 매출 최적화_450_250310",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 631,841회인데 CTR 0.26% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104727991,
+      "campaign_short": "플렉시젠 매출최적화_450_250310",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 891,338회인데 CTR 0.18% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 104752707,
+      "campaign_short": "쿠랩계란찜기_비검색_400_0319",
+      "code": "HIGH_IMP_LOW_CTR",
+      "name": "외면받는 상품",
+      "severity": "warning",
+      "priority": 7.8,
+      "detail": "노출 1,976,046회인데 CTR 0.08% — 썸네일·가격 점검"
+    },
+    {
+      "campaign_id": 103655096,
+      "campaign_short": "로켓배송(슈퍼큐브777)_0328",
+      "code": "HIGH_ROAS_LOW_CTR",
+      "name": "숨겨진 보석",
+      "severity": "info",
+      "priority": 7.5,
+      "detail": "ROAS 712%·CTR 0.07% — 노출 확대 기회"
+    },
+    {
+      "campaign_id": 103655096,
+      "campaign_short": "로켓배송(슈퍼큐브777)_0328",
+      "code": "NON_SEARCH_HIGH",
+      "name": "비검색 우위",
+      "severity": "info",
+      "priority": 5.8,
+      "detail": "비검색 ROAS 768% > 검색 486% — 비검색 가중치↑"
+    },
+    {
+      "campaign_id": 104589683,
+      "campaign_short": "매복_재난라디오_12.06_스마트 300원 12,13 120 원 ,12/…",
+      "code": "NON_SEARCH_HIGH",
+      "name": "비검색 우위",
+      "severity": "info",
+      "priority": 5.8,
+      "detail": "비검색 ROAS 723% > 검색 403% — 비검색 가중치↑"
+    },
+    {
+      "campaign_id": 104148787,
+      "campaign_short": "볼펜녹음기 VR-900 매출최적화 25/08/28 12.23 430%",
+      "code": "SEARCH_HIGH",
+      "name": "검색 우위 (키워드 확장 기회)",
+      "severity": "info",
+      "priority": 5.5,
+      "detail": "검색 ROAS 393% > 비검색 282% — 키워드 확장"
+    },
+    {
+      "campaign_id": 104544887,
+      "campaign_short": "보풀제거기 비검색 100원 12.29",
+      "code": "SEARCH_HIGH",
+      "name": "검색 우위 (키워드 확장 기회)",
+      "severity": "info",
+      "priority": 5.5,
+      "detail": "검색 ROAS 2789% > 비검색 326% — 키워드 확장"
+    },
+    {
+      "campaign_id": 104706704,
+      "campaign_short": "와야 문어발 마사지기 광고 테스트 0303",
+      "code": "SEARCH_HIGH",
+      "name": "검색 우위 (키워드 확장 기회)",
+      "severity": "info",
+      "priority": 5.5,
+      "detail": "검색 ROAS 722% > 비검색 299% — 키워드 확장"
+    },
+    {
+      "campaign_id": 104727991,
+      "campaign_short": "플렉시젠 매출최적화_450_250310",
+      "code": "SEARCH_HIGH",
+      "name": "검색 우위 (키워드 확장 기회)",
+      "severity": "info",
+      "priority": 5.5,
+      "detail": "검색 ROAS 423% > 비검색 163% — 키워드 확장"
+    }
+  ],
+  "rankings": {
+    "search_roas_top": [
+      {
+        "id": 104706704,
+        "name": "와야 문어발 마사지기 광고 테스트 0303",
+        "val": 7.2228760734056925
+      },
+      {
+        "id": 103655096,
+        "name": "로켓배송(슈퍼큐브777)_0328",
+        "val": 4.856817715426375
+      },
+      {
+        "id": 104302260,
+        "name": "일월 올리브그레이 탄소매트 매출 최적화_251021",
+        "val": 4.435224932816808
+      }
+    ],
+    "nonsearch_roas_top": [
+      {
+        "id": 103655096,
+        "name": "로켓배송(슈퍼큐브777)_0328",
+        "val": 7.684901858347638
+      },
+      {
+        "id": 104589683,
+        "name": "매복_재난라디오_12.06_스마트 300원 12,13 120 원 ,12/…",
+        "val": 7.227241858364675
+      },
+      {
+        "id": 104302260,
+        "name": "일월 올리브그레이 탄소매트 매출 최적화_251021",
+        "val": 5.327945776850886
+      }
+    ],
+    "low_roas": [
+      {
+        "id": 104626337,
+        "name": "플렉시젠_케이블 外 비검색 120원",
+        "val": 0.06454851897009252
+      },
+      {
+        "id": 104752707,
+        "name": "쿠랩계란찜기_비검색_400_0319",
+        "val": 0.7560071045342021
+      },
+      {
+        "id": 103620769,
+        "name": "보풀제거기(최적화1000_메인브랜드키워드 제외)_0318",
+        "val": 1.390271073152618
+      }
+    ],
+    "high_spend": [
+      {
+        "id": 104148787,
+        "name": "볼펜녹음기 VR-900 매출최적화 25/08/28 12.23 430%",
+        "val": 3089079.0
+      },
+      {
+        "id": 104589683,
+        "name": "매복_재난라디오_12.06_스마트 300원 12,13 120 원 ,12/…",
+        "val": 1337124.0
+      },
+      {
+        "id": 104706704,
+        "name": "와야 문어발 마사지기 광고 테스트 0303",
+        "val": 1222292.0
+      }
+    ],
+    "high_revenue": [
+      {
+        "id": 104148787,
+        "name": "볼펜녹음기 VR-900 매출최적화 25/08/28 12.23 430%",
+        "val": 10555170.0
+      },
+      {
+        "id": 104589683,
+        "name": "매복_재난라디오_12.06_스마트 300원 12,13 120 원 ,12/…",
+        "val": 6318900.0
+      },
+      {
+        "id": 104706704,
+        "name": "와야 문어발 마사지기 광고 테스트 0303",
+        "val": 4624700.0
+      }
+    ]
+  },
+  "meta": {
+    "generated_at": "2026-04-21",
+    "campaign_count": 15,
+    "keyword_rows": 226,
+    "product_count_total": 1048575
+  }
+};
+
+</script>
+<script>
+// === ADMIZER V1 UI 프로토타입 ===
+
+const D = window.ADMIZER_DATA;
+
+// --- 포맷터 ---
+const fmt = {
+  krw(n) {
+    n = Math.round(n || 0);
+    if (n >= 100000000) return (n / 100000000).toFixed(1) + '억';
+    if (n >= 10000) return (n / 10000).toFixed(0) + '만원';
+    return n.toLocaleString() + '원';
+  },
+  krwFull: n => (Math.round(n || 0)).toLocaleString() + '원',
+  pct(v, digits = 1) { return ((v || 0) * 100).toFixed(digits) + '%'; },
+  num: n => (Math.round(n || 0)).toLocaleString(),
+  roas: v => Math.round((v || 0) * 100) + '%',
+};
+
+function chip(severity) {
+  return `<span class="chip chip-${severity}">${
+    severity === 'critical' ? '🔴 긴급' :
+    severity === 'warning' ? '🟡 주의' :
+    '🟢 정보'
+  }</span>`;
+}
+
+function barMini(pctVal) {
+  const w = Math.min(100, Math.max(0, (pctVal || 0) * 100));
+  return `<span class="bar-mini"><span class="bar-mini-fill" style="width:${w}%"></span></span>`;
+}
+
+// --- KPI ---
+function renderKPIs() {
+  const t = D.all_total;
+  const pt = D.product_totals;
+  const totalRev = pt.revenue || 0;
+  const adRev = t.revenue || 0;
+  const adSpend = t.spend || 0;
+
+  // 광고 매출 비중
+  const adRevPct = totalRev ? (adRev / totalRev) * 100 : 0;
+
+  // 데모 delta (전주 대비) — 실제 기간 비교 API 붙기 전 플레이스홀더
+  const deltaDemo = { sales: +0.082, adRev: +0.121, profit: -0.034 };
+
+  // 원가 미입력 상품 집계 (spec 01 B: "원가 미입력 (N개 상품)" + CTA)
+  const missingCogs = D.products.filter(p => !p.cogs_input).length;
+  const totalProducts = D.products.length || 1;
+  const cogsMissingRatio = missingCogs / totalProducts;
+  const profitBlocked = cogsMissingRatio > 0.3;   // 30% 이상 미입력이면 CTA 표시
+
+  // 예산 소진률: 데모 가정치 (쿠팡 일예산 API 연동 전)
+  const utilization = 72;
+  let budgetState = 'normal', budgetLabel = '정상';
+  if (utilization > 95) { budgetState = 'bad'; budgetLabel = '초과 주의'; }
+  else if (utilization < 60) { budgetState = 'warn'; budgetLabel = '집행 저조'; }
+
+  // spec 01 순이익 계산: 광고매출 − 광고비 − (광고매출 × (원가율 + 수수료율))
+  // 원가 없을 때는 차단, 있을 때는 수수료 15% + 원가율 40% 가정
+  const estProfit = profitBlocked ? null : (adRev - adSpend - (adRev * 0.55));
+
+  const html = `
+    <div class="kpi">
+      <div class="kpi-label">전체 매출</div>
+      <div class="kpi-value">${fmt.krw(totalRev)}</div>
+      <div class="kpi-delta up">↑ ${(deltaDemo.sales*100).toFixed(1)}% <span class="neutral" style="font-weight:400;">vs 전주</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">광고매출</div>
+      <div class="kpi-value">${fmt.krw(adRev)} <span style="font-size:13px; color:var(--c-text-muted); font-weight:500;">(${adRevPct.toFixed(1)}%)</span></div>
+      <div class="kpi-delta up">↑ ${(deltaDemo.adRev*100).toFixed(1)}% <span class="neutral" style="font-weight:400;">vs 전주</span></div>
+    </div>
+    ${profitBlocked ? `
+      <div class="kpi">
+        <div class="kpi-label">광고 순이익 <span class="kpi-tooltip" title="부가세·쿠폰·프로모션·배송비·반품은 미반영. 실제 정산액과 차이가 날 수 있습니다.">ⓘ</span></div>
+        <div class="kpi-value" style="font-size:18px; color:var(--c-text-muted); font-weight:600;">원가 미입력</div>
+        <div class="kpi-delta neutral" style="margin-bottom:8px;">${missingCogs}개 상품 · 순이익 계산 불가</div>
+        <button class="btn btn-primary" style="width:100%; padding:6px 0; font-size:12px;" onclick="switchView('rules'); alert('화면 05 설정 · 원가 관리로 이동 (프로토타입)');">원가 입력 →</button>
+      </div>
+    ` : `
+      <div class="kpi">
+        <div class="kpi-label">광고 순이익 <span class="kpi-tooltip" title="부가세·쿠폰·프로모션·배송비·반품은 미반영. 실제 정산액과 차이가 날 수 있습니다.">ⓘ</span></div>
+        <div class="kpi-value ${estProfit < 0 ? 'bad' : ''}">${fmt.krw(estProfit)}</div>
+        <div class="kpi-delta ${deltaDemo.profit >= 0 ? 'up' : 'down'}">${deltaDemo.profit >= 0 ? '↑' : '↓'} ${Math.abs(deltaDemo.profit*100).toFixed(1)}% <span class="neutral" style="font-weight:400;">vs 전주</span></div>
+      </div>
+    `}
+    <div class="kpi">
+      <div class="kpi-label">예산 소진률 <span class="kpi-tooltip" title="쿠팡 일예산 API 연동 전 데모값. 70~95% 정상, >95% 경고, <60% 저조.">ⓘ</span></div>
+      <div class="kpi-value">${utilization}% <span style="font-size:12px; color:var(--c-text-muted); font-weight:500;">${budgetLabel}</span></div>
+      <div class="kpi-bar"><div class="kpi-bar-fill kpi-bar-${budgetState}" style="width:${utilization}%"></div></div>
+      <div class="kpi-delta neutral" style="margin-top:6px;">광고비 ${fmt.krw(adSpend)} · ROAS ${fmt.roas(t.roas)}</div>
+    </div>
+  `;
+  document.getElementById('kpi-strip').innerHTML = html;
+}
+
+// --- 인사이트 카드 ---
+function renderInsights() {
+  const top5 = D.insights.slice(0, 5);
+  const mode = document.body.classList.contains('mode-pro') ? 'pro' : 'simple';
+
+  const html = top5.map(i => `
+    <div class="insight-card">
+      <div class="insight-card-head">
+        ${chip(i.severity)}
+        <span class="chip chip-type">${i.name}</span>
+      </div>
+      <div class="insight-body">${i.detail}</div>
+      <div class="insight-target pro-only">▸ ${escapeHtml(i.campaign_short)}</div>
+      <div class="insight-actions">
+        <button class="btn btn-sm btn-primary" onclick='showModal("${i.code}", ${JSON.stringify(i.campaign_short).replace(/"/g,'&quot;')})'>자동 추천 받기</button>
+        <button class="btn-link pro-only" onclick='goCampaign(${i.campaign_id})'>상세 분석 →</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('insight-grid').innerHTML = html ||
+    '<div style="padding:20px; color:var(--c-text-muted);">매칭된 인사이트가 없습니다.</div>';
+  document.getElementById('insight-total-count').textContent = D.insights.length;
+
+  // 전체 리스트 (인사이트 뷰)
+  document.getElementById('insight-full-list').innerHTML = D.insights.map(i => `
+    <div class="insight-card" style="margin-bottom:10px;">
+      <div class="insight-card-head">
+        ${chip(i.severity)} <span class="chip chip-type">${i.name}</span>
+        <span style="color:var(--c-text-muted); font-size:12px;">${escapeHtml(i.campaign_short)}</span>
+      </div>
+      <div class="insight-body">${i.detail}</div>
+    </div>
+  `).join('');
+}
+
+// --- 순위 그리드 (spec 01 D: 2×3 고정 6카드) ---
+function rankCard({ title, icon, items, formatter, bad, emptyNote, filterKey }) {
+  if (!items || items.length === 0) {
+    return `<div class="rank-card">
+      <div class="rank-head"><span class="rank-title">${title}</span><span class="rank-icon">${icon}</span></div>
+      <div class="rank-empty">${emptyNote || '해당 조건 캠페인 없음'}</div>
+    </div>`;
+  }
+  const lis = items.slice(0, 3).map((it, i) => `
+    <li>
+      <span style="color:var(--c-text-muted); width:14px; display:inline-block;">${i+1}.</span>
+      <span class="rank-name" title="${escapeHtml(it.name)}">${escapeHtml(it.name)}</span>
+      <span class="rank-value ${bad ? 'bad' : ''}">${formatter(it.val)}</span>
+    </li>
+  `).join('');
+  const extra = Math.max(0, items.length - 3);
+  return `
+    <div class="rank-card">
+      <div class="rank-head"><span class="rank-title">${title}</span><span class="rank-icon">${icon}</span></div>
+      <ul class="rank-list">${lis}</ul>
+      <div class="rank-more">
+        ${extra ? `<span class="pro-only" style="color:var(--c-text-muted); margin-right:8px;">외 ${extra}개</span>` : ''}
+        <a onclick="goCampaign(${items[0].id})">상세보기 →</a>
+      </div>
+    </div>
+  `;
+}
+
+function placeholderCard({ title, icon, hint, note, external }) {
+  return `
+    <div class="rank-card" style="border:1px dashed var(--c-border); background:#FCFDFE;">
+      <div class="rank-head"><span class="rank-title" style="color:var(--c-text-muted);">${title}</span><span class="rank-icon">${icon}</span></div>
+      <div style="padding:18px 0; text-align:center;">
+        <div style="font-size:12px; color:var(--c-text-muted); margin-bottom:4px;">${hint}</div>
+        <div style="font-size:11px; color:var(--c-text-muted); opacity:0.7;">${note}</div>
+      </div>
+      <div class="rank-more"><span style="color:var(--c-text-muted); font-size:11px;">${external ? '쿠팡 WING ↗' : 'V1 연동 예정'}</span></div>
+    </div>
+  `;
+}
+
+function renderRankings() {
+  const r = D.rankings;
+  // spec 01 D: 6개 고정 카드 (2행 × 3열)
+  const html = [
+    rankCard({ title: '검색영역 ROAS 탑3',  icon: '🔍', items: r.search_roas_top,    formatter: fmt.roas }),
+    rankCard({ title: '비검색 ROAS 탑3',    icon: '📢', items: r.nonsearch_roas_top, formatter: fmt.roas }),
+    placeholderCard({ title: '예산 부족',      icon: '⚠',  hint: '일예산 소진률 95% 이상', note: '쿠팡 일예산 API 연동 예정' }),
+    placeholderCard({ title: '아이템위너 OFF', icon: '🏆', hint: '위너 이탈로 광고 OFF',   note: '아이템위너 상태 API 연동 예정' }),
+    placeholderCard({ title: '재고 없음 OFF',  icon: '📦', hint: '재고 0 · 광고 OFF',      note: '쿠팡 WING 재고 연동 예정', external: true }),
+    rankCard({ title: '광고수익율 관리',    icon: '📉', items: r.low_roas,           formatter: fmt.roas, bad: true, emptyNote: '저ROAS 캠페인 없음' }),
+  ].join('');
+  document.getElementById('rank-grid').innerHTML = html;
+}
+
+// --- 캠페인 리스트 ---
+function renderCampaigns() {
+  const rows = D.campaigns.map(c => {
+    const t = c.total;
+    const type = c.type && c.type.indexOf('매출') >= 0 ? '매최' : '수동';
+    const roasClass = t.roas < 2 ? 'bad' : t.roas > 4 ? 'good' : '';
+    return `
+      <tr data-cid="${c.id}">
+        <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+        <td class="camp-name"><span class="status-dot"></span>${escapeHtml(c.short_name || '-')}</td>
+        <td><span class="chip chip-type">${type}</span></td>
+        <td class="num">${fmt.krw(t.revenue)}</td>
+        <td class="num">${fmt.krw(t.spend)}</td>
+        <td class="num ${roasClass}">${fmt.roas(t.roas)}</td>
+        <td class="num">${fmt.pct(t.cvr, 2)}</td>
+        <td class="num pro-only">${fmt.num(t.cpc)}원</td>
+        <td class="num pro-only">${fmt.num(t.impressions)}</td>
+        <td class="num pro-only">${fmt.pct(t.ctr, 2)}</td>
+        <td class="num pro-only">${fmt.num(t.qty)}</td>
+      </tr>
+    `;
+  }).join('');
+  document.getElementById('camp-tbody').innerHTML = rows;
+
+  document.querySelectorAll('#camp-tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      document.querySelectorAll('#camp-tbody tr').forEach(r => r.classList.remove('selected'));
+      tr.classList.add('selected');
+      diagnose(parseInt(tr.dataset.cid));
+    });
+  });
+
+  document.getElementById('tab-diagnose-count').textContent = D.insights.filter(i => i.severity !== 'info').length;
+}
+
+// --- 진단 패널 ---
+function diagnose(cid) {
+  const c = D.campaigns.find(x => x.id === cid);
+  if (!c) return;
+  const t = c.total;
+  const search = c.areas['검색'] || {};
+  const nonsearch = c.areas['비검색'] || {};
+
+  // 매칭된 인사이트
+  const matched = D.insights.filter(i => i.campaign_id === cid);
+
+  // 액션 플랜 4카드 (기본 진단) - PPT 슬라이드 6 구조
+  const lowRoasKW = c.keywords.filter(k => k.spend > 0 && k.roas < 2.0).length;
+  const lowCvrKW = c.keywords.filter(k => k.clicks > 10 && k.cvr < 0.02).length;
+  const highCpcKW = c.keywords.filter(k => k.cpc > 1000).length;
+  const lowCtrKW = c.keywords.filter(k => k.impressions > 100 && k.ctr < 0.005).length;
+
+  // 상위 키워드 (클릭 많은 순)
+  const topKeywords = c.keywords.slice(0, 10);
+
+  const html = `
+    <div class="diagnose-head">
+      <h3>${escapeHtml(c.short_name || '')} <span class="chip chip-type" style="margin-left:6px;">${c.type || ''}</span></h3>
+      <div class="diagnose-meta">캠페인 ID ${c.id} · 시작일 ${c.start_date} · 상품: ${escapeHtml((c.product || '').slice(0,50))}</div>
+    </div>
+
+    ${matched.length > 0 ? `
+      <div style="margin-bottom:14px;">
+        <strong style="font-size:13px;">매칭된 인사이트 ${matched.length}건</strong>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+          ${matched.map(m => `${chip(m.severity)} <span class="chip chip-type">${m.name}</span>`).join(' ')}
+        </div>
+      </div>
+    ` : ''}
+
+    <table class="area-table">
+      <thead>
+        <tr>
+          <th>영역</th>
+          <th>매출</th><th>판매량</th><th>ROAS</th>
+          <th>노출수</th><th>클릭률</th><th>전환율</th>
+          <th>CPC</th><th>광고비</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>비검색</td>
+          <td>${fmt.krw(nonsearch.revenue)}</td>
+          <td>${fmt.num(nonsearch.qty)}</td>
+          <td>${fmt.roas(nonsearch.roas)}</td>
+          <td>${fmt.num(nonsearch.impressions)}</td>
+          <td>${fmt.pct(nonsearch.ctr, 2)}</td>
+          <td>${fmt.pct(nonsearch.cvr, 2)}</td>
+          <td>${fmt.num(nonsearch.cpc)}원</td>
+          <td>${fmt.krw(nonsearch.spend)}</td>
+        </tr>
+        <tr>
+          <td>검색</td>
+          <td>${fmt.krw(search.revenue)}</td>
+          <td>${fmt.num(search.qty)}</td>
+          <td>${fmt.roas(search.roas)}</td>
+          <td>${fmt.num(search.impressions)}</td>
+          <td>${fmt.pct(search.ctr, 2)}</td>
+          <td>${fmt.pct(search.cvr, 2)}</td>
+          <td>${fmt.num(search.cpc)}원</td>
+          <td>${fmt.krw(search.spend)}</td>
+        </tr>
+        <tr style="font-weight:700; background:#F7FAFC;">
+          <td>전체</td>
+          <td>${fmt.krw(t.revenue)}</td>
+          <td>${fmt.num(t.qty)}</td>
+          <td>${fmt.roas(t.roas)}</td>
+          <td>${fmt.num(t.impressions)}</td>
+          <td>${fmt.pct(t.ctr, 2)}</td>
+          <td>${fmt.pct(t.cvr, 2)}</td>
+          <td>${fmt.num(t.cpc)}원</td>
+          <td>${fmt.krw(t.spend)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="summary">
+      ${summaryText(c, t, search, nonsearch)}
+    </div>
+
+    <!-- 액션 플랜 4카드 -->
+    <div class="action-cards">
+      ${actionCard('ROAS < 200%', lowRoasKW, 'roas-low')}
+      ${actionCard('전환율 < 2%', lowCvrKW, 'cvr-low')}
+      ${actionCard('CPC > 1,000원', highCpcKW, 'cpc-high')}
+      ${actionCard('클릭률 < 0.5%', lowCtrKW, 'ctr-low')}
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid var(--c-border);">
+      <button class="btn" onclick="showModal('TARGET_ROAS', '${escapeHtml(c.short_name)}')">목표 ROAS 조정</button>
+      <button class="btn" onclick="showModal('BUDGET', '${escapeHtml(c.short_name)}')">예산 설정</button>
+      <button class="btn pro-only" onclick="alert('세부 조율 UI (수동광고 CPC 개별 편집 등)')">세부 조율</button>
+    </div>
+
+    ${topKeywords.length > 0 ? `
+      <div style="margin-top:20px;">
+        <div style="font-weight:700; margin-bottom:8px; font-size:13px;">주요 키워드 (상위 ${topKeywords.length}개, 클릭 순)</div>
+        <table class="kw-table">
+          <thead>
+            <tr>
+              <th>키워드</th>
+              <th>노출</th><th>클릭</th><th>CTR</th>
+              <th>CVR</th><th>CPC</th><th>ROAS</th><th>광고비</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${topKeywords.map(k => `
+              <tr>
+                <td title="${escapeHtml(k.keyword)}">${escapeHtml(k.keyword)}</td>
+                <td>${fmt.num(k.impressions)}</td>
+                <td>${fmt.num(k.clicks)}</td>
+                <td>${fmt.pct(k.ctr, 2)}</td>
+                <td>${fmt.pct(k.cvr, 2)}</td>
+                <td>${fmt.num(k.cpc)}원</td>
+                <td class="${k.roas < 2 ? 'bad' : k.roas > 4 ? 'good' : ''}">${fmt.roas(k.roas)}</td>
+                <td>${fmt.krw(k.spend)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : ''}
+
+    <div class="v2-stub pro-only">
+      <h4>🚧 V2 예정 기능</h4>
+      <ul style="margin-left:16px; margin-top:4px;">
+        <li>키워드별 노출 순위 추적 <span class="v2-tag">V2</span></li>
+        <li>연관 키워드 2~3단계 트리 발굴 + 수동 광고 벌크 세팅 <span class="v2-tag">V2</span></li>
+      </ul>
+    </div>
+  `;
+
+  const panel = document.getElementById('diagnose-panel');
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function actionCard(title, count, code) {
+  return `
+    <div class="action-card">
+      <h4>${title} 키워드</h4>
+      <div class="count">${count}개</div>
+      <div class="radio-group">
+        <label><input type="radio" name="${code}"> 필수키워드 지정</label>
+        <label><input type="radio" name="${code}" checked> 제외키워드</label>
+        <label><input type="radio" name="${code}"> 제외 + 수동 이관</label>
+      </div>
+      <button class="btn btn-sm btn-primary" onclick="showModal('KW_ACTION', '${title} · ${count}개')">실행</button>
+    </div>
+  `;
+}
+
+function summaryText(c, t, s, n) {
+  const parts = [];
+  parts.push(`전체 ROAS <b>${fmt.roas(t.roas)}</b>, 광고비 <b>${fmt.krw(t.spend)}</b>, 광고매출 <b>${fmt.krw(t.revenue)}</b>.`);
+  if (s.roas && n.roas) {
+    if (s.roas > n.roas * 1.3) parts.push(`검색 영역 효율(${fmt.roas(s.roas)})이 비검색(${fmt.roas(n.roas)}) 대비 높음 — 키워드 확장 기회.`);
+    else if (n.roas > s.roas * 1.3) parts.push(`비검색 영역 효율(${fmt.roas(n.roas)})이 검색(${fmt.roas(s.roas)}) 대비 높음 — 비검색 가중치 상향 고려.`);
+  }
+  if (t.roas < 2) parts.push('<span style="color:var(--c-critical);">⚠ ROAS 200% 미만 — 즉시 개선 필요.</span>');
+  return parts.join(' ');
+}
+
+// --- 모달 (spec 공통패턴 §1: Slot A/B/C/D) ---
+// common-patterns.md 기준 반영 시간 (PoC 결과):
+//   예산 변경: 5~15분  | 목표 ROAS: 15~60분 | 키워드 CPC: 1~5분
+//   키워드 제외: 10~30분 | 캠페인 ON/OFF: 1~5분
+const MODAL_PRESETS = {
+  'TARGET_ROAS': {
+    title: '목표 ROAS 조정',
+    summary: [
+      { label: '목표 ROAS', before: '300%', after: '350%', delta: '+50%p', deltaClass: 'good' },
+      { label: '예상 일예산 영향', value: '변동 없음', neutral: true },
+    ],
+    expected: '예상 ROAS 영향: <b>+18 ~ +32%</b> (7일 실측 기반)',
+    rollout: '일반적으로 15분 ~ 1시간 내 반영',
+  },
+  'BUDGET': {
+    title: '예산 설정',
+    summary: [
+      { label: '일예산', before: '₩50,000', after: '₩80,000', delta: '+₩30,000', deltaClass: 'good' },
+      { label: '월 환산', before: '₩1,500,000', after: '₩2,400,000', delta: '+₩900,000', deltaClass: 'neutral' },
+    ],
+    expected: null,
+    rollout: '일반적으로 15분 내 반영',
+  },
+  'KW_ACTION': {
+    title: '키워드 액션 실행',
+    summary: [
+      { label: '제외 키워드', before: '23', after: '38', delta: '+15', deltaClass: 'good' },
+      { label: '수동광고 키워드', before: '120', after: '135', delta: '+15', deltaClass: 'good' },
+      { label: '예상 일예산 영향', value: '변동 없음', neutral: true },
+    ],
+    expected: '예상 ROAS 영향: <b>+18 ~ +32%</b>',
+    rollout: '30분 내 반영 (키워드 변경)',
+  },
+  'APPLY_INSIGHT': {
+    title: '인사이트 적용',
+    summary: [
+      { label: '추천 액션', value: '제외 키워드 추가 + 수동 이관', neutral: true },
+      { label: '영향 키워드', before: '0', after: '18', delta: '+18', deltaClass: 'good' },
+    ],
+    expected: '예상 ROAS 영향: <b>+12 ~ +22%</b>',
+    rollout: '30분 내 반영',
+  },
+};
+
+function showModal(actionCode, campName) {
+  const preset = MODAL_PRESETS[actionCode] || MODAL_PRESETS['APPLY_INSIGHT'];
+
+  // Slot A: 제목
+  document.getElementById('modal-title').textContent =
+    `${preset.title}${campName ? ' (' + campName + ')' : ''}`;
+
+  // Slot B: 영향 요약 (변경 전 → 후 표)
+  const rows = preset.summary.map(s => {
+    if (s.neutral && !s.before) {
+      return `
+        <tr>
+          <td style="color:var(--c-text-muted); padding:8px 0;">${s.label}</td>
+          <td style="text-align:right; padding:8px 0;">${s.value || '-'}</td>
+        </tr>`;
+    }
+    return `
+      <tr>
+        <td style="color:var(--c-text-muted); padding:8px 0; width:40%;">${s.label}</td>
+        <td style="text-align:right; padding:8px 0; font-variant-numeric:tabular-nums;">
+          <span style="color:var(--c-text-muted);">${s.before}</span>
+          <span style="margin:0 6px;">→</span>
+          <b>${s.after}</b>
+          ${s.delta ? `<span class="${s.delta.startsWith('-') ? 'bad' : s.deltaClass || ''}" style="margin-left:6px; font-weight:600;">(${s.delta})</span>` : ''}
+        </td>
+      </tr>`;
+  }).join('');
+
+  // Slot C: 예상 결과 (옵션)
+  const slotC = preset.expected
+    ? `<div style="background:#EEF4FF; color:var(--c-primary); padding:10px 12px; border-radius:6px; margin-top:10px; font-size:13px;">${preset.expected}</div>`
+    : '';
+
+  // Slot D: 반영 시간 고지
+  const slotD = `
+    <div style="display:flex; gap:6px; align-items:flex-start; margin-top:12px; padding:8px 10px; background:var(--c-warn-bg); border-radius:4px; color:#B45309; font-size:12px;">
+      <span>⚠</span>
+      <span>${preset.rollout}</span>
+    </div>`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <p style="color:var(--c-text-muted); margin-bottom:12px;">이 작업은 쿠팡 API에 반영됩니다.</p>
+    <div style="border:1px solid var(--c-border); border-radius:6px; overflow:hidden;">
+      <div style="background:#F7FAFC; padding:8px 12px; font-size:12px; font-weight:600; color:var(--c-text-muted); border-bottom:1px solid var(--c-border);">변경 요약</div>
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <tbody>${rows.replace(/padding:8px 0/g, 'padding:8px 12px')}</tbody>
+      </table>
+    </div>
+    ${slotC}
+    ${slotD}
+  `;
+
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+}
+
+// --- 알림 벨 ---
+function renderBell() {
+  const notifs = D.insights.slice(0, 12);
+  document.getElementById('bell-count').textContent = notifs.filter(n => n.severity === 'critical').length || notifs.length;
+  document.getElementById('bell-count-text').textContent = notifs.length;
+  document.getElementById('bell-list').innerHTML = notifs.map(n => `
+    <div class="bell-item" onclick="goCampaign(${n.campaign_id}); closeBell();">
+      <div>${chip(n.severity)} ${n.name}</div>
+      <div class="bell-ts">${escapeHtml(n.campaign_short)}</div>
+    </div>
+  `).join('');
+}
+function closeBell() {
+  document.getElementById('bell-popover').classList.remove('open');
+}
+
+// --- 네비게이션 ---
+function switchView(view) {
+  document.querySelectorAll('.gnb-nav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+}
+function goCampaign(cid) {
+  switchView('campaigns');
+  setTimeout(() => {
+    const tr = document.querySelector(`#camp-tbody tr[data-cid="${cid}"]`);
+    if (tr) {
+      tr.classList.add('selected');
+      tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      diagnose(cid);
+    }
+  }, 50);
+}
+
+// --- 서브탭 ---
+function switchSubtab(key) {
+  document.querySelectorAll('.subtab').forEach(t => t.classList.toggle('active', t.dataset.subtab === key));
+  ['diagnose','compare','logs','schedule'].forEach(k => {
+    document.getElementById('sub-' + k).style.display = (k === key ? 'block' : 'none');
+  });
+}
+
+// --- 모드 토글 ---
+function switchMode(mode) {
+  document.body.className = 'mode-' + mode;
+  document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  // 일부 재렌더
+  renderInsights();
+}
+
+// --- 유틸 ---
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+// --- 이벤트 바인딩 ---
+document.querySelectorAll('.gnb-nav a').forEach(a => {
+  a.addEventListener('click', () => switchView(a.dataset.view));
+});
+document.querySelectorAll('.section-link').forEach(a => {
+  if (a.dataset.view) a.addEventListener('click', () => switchView(a.dataset.view));
+});
+document.querySelectorAll('.subtab').forEach(t => {
+  t.addEventListener('click', () => switchSubtab(t.dataset.subtab));
+});
+document.querySelectorAll('.mode-toggle button').forEach(b => {
+  b.addEventListener('click', () => switchMode(b.dataset.mode));
+});
+document.getElementById('bell-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('bell-popover').classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#bell-popover') && !e.target.closest('#bell-btn')) closeBell();
+});
+document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-backdrop') closeModal();
+});
+
+// --- 초기 렌더 ---
+renderKPIs();
+renderInsights();
+renderRankings();
+renderCampaigns();
+renderBell();
+
+</script>
+</body>
+</html>

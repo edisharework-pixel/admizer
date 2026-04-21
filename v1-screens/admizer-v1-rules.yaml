@@ -1,0 +1,501 @@
+# 애드마이저 V1 — 룰 엔진 케이스 정의 (21종)
+#
+# 상위 기획: C:\Users\cjh78\.claude\plans\glowing-sauteeing-cray.md
+# 관련 화면: 04-애드마이저-인사이트.md (시나리오 북), 01-통합분석-대시보드.md (인사이트 카드)
+#
+# 사용:
+#   1) 집계기가 (캠페인 × 영역 × 최근 7/14/30일)로 지표를 산출
+#   2) 각 case.condition을 캠페인에 평가 → 매칭된 case들의 priority 내림차순 정렬
+#   3) 상위 N개(대시보드 5, 인사이트 10) 선택 → LLM 프롬프트에 주입
+#
+# 필드 규약:
+#   code           : 내부 코드 (UI 딥링크 키)
+#   name           : 사용자 노출 이름
+#   severity       : critical | warning | info (UI 색상 매핑)
+#   priority       : 임팩트 점수 (0~10, 높을수록 우선)
+#   category       : traffic_quality | profitability | reach | cost | budget | external
+#   condition      : 매칭 조건 (AND) — 각 항목은 metric + op + value
+#   data_window    : 매칭에 쓰이는 기간 (ex: last_14d, last_7d)
+#   min_samples    : 노이즈 방지용 최소 관측치 (클릭 수 등)
+#   action_template: UI의 액션 플랜 3~6단계 (LLM이 사용자 수치로 구체화)
+#   llm_hint       : LLM 프롬프트에 추가할 케이스 특화 힌트
+
+version: 1
+default_min_clicks: 50          # 클릭 50회 미만 키워드는 매칭 배제
+default_window: last_14d
+cooldown_hours: 24              # 같은 case를 같은 캠페인에 하루 1회 이상 매칭 시 묶음 처리
+
+cases:
+
+  # === 트래픽 품질 ===
+
+  - code: HIGH_CTR_LOW_CVR
+    name: 빛 좋은 개살구
+    severity: warning
+    priority: 8.2
+    category: traffic_quality
+    data_window: last_14d
+    min_samples: 100
+    condition_match: any              # 두 영역 중 하나만 만족해도 매칭 (OR 완화)
+    condition:
+      search_area:
+        ctr: "> 0.04"             # 검색 4% 이상
+        cvr: "< 0.02"             # 전환 2% 미만
+      non_search_area:
+        ctr: "> 0.004"
+        cvr: "< 0.015"
+    action_template:
+      - "상세페이지 개선 — 리뷰·이미지·핵심 혜택 재배치"
+      - "썸네일 A/B 테스트"
+      - "부정적 리뷰의 페인 포인트를 상세페이지에서 선제 해소"
+      - "상품 상세 이탈 구간 분석 (히트맵 툴 연동)"
+    llm_hint: "클릭은 많지만 구매로 이어지지 않는 상태. 상세페이지·가격·리뷰 신뢰도가 원인일 확률이 큼."
+
+  - code: HIGH_CVR_LOW_ROAS
+    name: 승자의 저주 (고효율 저수익)
+    severity: critical
+    priority: 9.2
+    category: profitability
+    data_window: last_14d
+    min_samples: 50
+    condition:
+      overall:
+        cvr: "> 0.05"
+        roas: "< 3.0"
+        cpc_to_aov_ratio: "> 0.05"  # CPC가 판매가의 5% 초과
+    action_template:
+      - "매출 최적화 목표 ROAS +30~50% 상향"
+      - "CPC 1,500원 이상 키워드를 수동 성과형으로 이관"
+      - "대형 키워드를 제외 키워드로 등록 후 롱테일 수동 추가"
+      - "1+1·세트 구성으로 AOV 증대"
+      - "비검색 영역 입찰 가중치 활용"
+      - "외부 트래픽(인스타/숏폼)으로 쿠팡 랭킹 부스팅"
+    llm_hint: "상품력은 우수, 알고리즘이 과도하게 입찰 경쟁에 휘말린 상태. '순위 집착 버리기'가 핵심."
+
+  - code: LOW_ROAS_HIGH_CTR
+    name: 고효율 저수익의 역설
+    severity: warning
+    priority: 8.0
+    category: profitability
+    data_window: last_14d
+    min_samples: 100
+    condition:
+      overall:
+        ctr: "> 0.03"             # 검색 3% 이상 (유입은 많음)
+        roas: "< 3.0"             # 300% 미만
+        cvr: ">= 0.02"            # 전환은 어느 정도 발생
+    action_template:
+      - "CPC 상한선 설정 (수동 이관) — 현재 CPC의 70% 수준"
+      - "목표 ROAS +20% 상향으로 입찰 거품 제거"
+      - "상세페이지 전환 동선 점검 (할인 배지·리뷰 노출)"
+      - "세트·묶음 구성으로 객단가 상향"
+    llm_hint: "클릭도 전환도 어느 정도 나오지만 광고비가 매출을 잠식. 입찰가가 마진 한계를 초과했을 가능성이 큼. 승자의 저주의 완화된 버전."
+
+  - code: LOW_CTR_LOW_ROAS
+    name: 전면 재검토
+    severity: critical
+    priority: 8.8
+    category: reach
+    data_window: last_14d
+    min_samples: 100
+    condition:
+      overall:
+        ctr: "< 0.005"
+        roas: "< 2.0"
+    action_template:
+      - "썸네일 교체 후 14일 관찰"
+      - "가격 경쟁력 재점검 (상위 경쟁사 3개 비교)"
+      - "관련성 낮은 키워드 제거"
+      - "카테고리·태그 재설정"
+    llm_hint: "상품 매력도와 타겟팅 모두 문제. 광고 효율 개선 전에 상품 자체를 점검해야 함."
+
+  # === 수익성 ===
+
+  - code: HIGH_ROAS_LOW_CTR
+    name: 숨겨진 보석
+    severity: info
+    priority: 7.5
+    category: profitability
+    data_window: last_30d
+    min_samples: 30
+    condition:
+      overall:
+        roas: "> 5.0"
+        ctr: "< 0.03"               # 검색 3% 이하
+      non_search_area:
+        ctr: "< 0.0007"
+    action_template:
+      - "노출수 증대 — 입찰가 +15~20% 상향"
+      - "롱테일 관련 키워드 추가 발굴"
+      - "예산 상향 (+10%)"
+    llm_hint: "효율은 좋지만 볼륨이 작음. '조용한 강자'에게 볼륨을 줄 기회."
+
+  - code: HIGH_CVR_HIGH_CPA
+    name: 마진 점검 필요
+    severity: warning
+    priority: 7.0
+    category: profitability
+    data_window: last_14d
+    min_samples: 50
+    condition:
+      overall:
+        cvr: "> 0.04"
+        cpa_to_aov_ratio: "> 0.15"  # CPA가 판매가 15% 초과
+    action_template:
+      - "원가·수수료 점검 후 BE-ROAS 재산출"
+      - "목표 ROAS를 BE-ROAS × 1.2 기준으로 재설정"
+      - "마진 낮은 옵션 일부 광고 제외"
+    llm_hint: "전환은 나오지만 건당 비용이 커 마진을 잠식. 원가 기반 BE-ROAS 점검이 우선."
+
+  # === 도달 / 확장성 ===
+
+  - code: LOW_IMP_HIGH_CVR
+    name: 우물 안 개구리
+    severity: info
+    priority: 6.8
+    category: reach
+    data_window: last_14d
+    min_samples: 30
+    condition:
+      overall:
+        impressions: "< 5000"
+        cvr: "> 0.04"
+    action_template:
+      - "입찰가 20% 상향 테스트"
+      - "연관 키워드 2단계 트리 확장 (수동 성과형)"
+      - "비검색 영역 노출 강화"
+      - "카테고리 경쟁 강도 재확인"
+    llm_hint: "상품력은 확보되었으나 노출 자체가 부족. 예산·키워드 확장으로 볼륨을 끌어올릴 것."
+
+  - code: HIGH_IMP_LOW_CTR
+    name: 외면받는 상품
+    severity: warning
+    priority: 7.8
+    category: traffic_quality
+    data_window: last_14d
+    min_samples: 500
+    condition:
+      overall:
+        impressions: "> 10000"
+        ctr: "< 0.003"
+    action_template:
+      - "썸네일 전면 교체 (A/B 테스트)"
+      - "상품명 키워드 재배열"
+      - "경쟁 상품 대비 가격 점검"
+      - "핵심 혜택 배지(무료배송·로켓·할인) 활성화"
+    llm_hint: "노출은 충분하나 클릭이 없음. 썸네일·가격·첫인상에서 경쟁 열위."
+
+  # === 예산 ===
+
+  - code: BUDGET_SPARE_LOW_CVR
+    name: 과잉 예산
+    severity: warning
+    priority: 6.5
+    category: budget
+    data_window: last_14d
+    min_samples: 50
+    condition:
+      overall:
+        budget_utilization: "< 0.6"   # 60% 미만 소진
+        cvr: "< 0.02"
+    action_template:
+      - "예산 -20% 축소 후 7일 관찰"
+      - "저효율 키워드 자동 축소"
+      - "타깃 영역(검색/비검색) 재조정"
+    llm_hint: "예산이 남는데도 전환이 낮음. 지금은 키우는 게 아니라 접점을 정리할 시점."
+
+  - code: BUDGET_TIGHT_HIGH_ROAS
+    name: 기회 손실
+    severity: critical
+    priority: 9.0
+    category: budget
+    data_window: last_7d
+    min_samples: 50
+    # budget_exhaust_time은 쿠팡 시간별 보고서 granularity 확인 필요 (PoC).
+    # 지원 불가 시 조건에서 제외하고 nightly 배치로 소진 패턴 추정.
+    condition:
+      overall:
+        budget_utilization: "> 0.95"
+        roas: "> 4.0"
+      optional:                         # 쿠팡 API가 지원할 때만 조건 추가
+        budget_exhaust_time: "< 14:00"
+    action_template:
+      - "예산 +30% 즉시 상향"
+      - "목표 ROAS 유지 (하향 금지)"
+      - "시간대별 예산 배분 검토"
+    llm_hint: "ROAS도 좋고 소진도 빠름 — 예산을 쓰면 쓸수록 이익. 지금 막지 말 것."
+
+  # === 시간대 / 계절성 ===
+
+  - code: PEAK_HOUR_MISMATCH
+    name: 피크 타임 놓침
+    severity: warning
+    priority: 6.3
+    category: budget
+    data_window: last_14d
+    min_samples: 100
+    condition:
+      hourly_pattern:
+        peak_hours_roas_gap: "> 0.8"    # 피크 vs 비피크 ROAS 차이 80%p+
+        peak_hours_budget_pct: "< 0.4"  # 피크 예산 비중 40% 미만
+    action_template:
+      - "02:00~06:30 예산 축소 (노출시간 관리)"
+      - "피크 시간대(19:00~22:00) 예산 가중치 +50%"
+      - "비피크 수동광고 CPC 하향"
+    llm_hint: "매출이 몰리는 시간대에 오히려 예산이 부족. 시간대별 재배분만으로 ROAS 개선 가능."
+
+  # === 경쟁 / 외부 ===
+
+  - code: ITEM_WINNER_LOST
+    name: 아이템위너 이탈
+    severity: critical
+    priority: 9.5
+    category: external
+    data_window: last_1d
+    min_samples: 1
+    condition:
+      status:
+        item_winner: false
+        ad_active: false
+        deactivation_reason: "not_item_winner"
+    action_template:
+      - "쿠팡 WING에서 가격 확인"
+      - "아이템위너 가격 추적 시스템 ON"
+      - "최저가 ±50원 자동 조정 (설정)"
+    llm_hint: "광고가 꺼진 즉시성 이슈. 가격 추적이 복구의 전부."
+
+  - code: OUT_OF_STOCK
+    name: 재고 소진
+    severity: critical
+    priority: 9.4
+    category: external
+    data_window: last_1d
+    min_samples: 1
+    condition:
+      status:
+        stock: 0
+        ad_active: false
+    action_template:
+      - "재고 보충 일정 확인"
+      - "대체 SKU로 광고 일시 이관"
+      - "재고 알림 임계값 재설정 (안전재고 확보)"
+    llm_hint: "광고 중단 사유가 재고. 재고 확보가 선행."
+
+  - code: THUMBNAIL_CHANGE_PENDING
+    name: 썸네일 변경 반영 대기
+    severity: info
+    priority: 4.5
+    category: external
+    data_window: last_7d
+    min_samples: 0
+    condition:
+      events:
+        thumbnail_changed: true
+        ad_active: false
+    action_template:
+      - "쿠팡 WING에서 변경 심사 상태 확인"
+      - "심사 완료 시 광고 재개 자동화 ON"
+    llm_hint: "썸네일 미승인으로 광고 중단. 자동 재개 설정 권장."
+
+  # === 급변 / 이상 탐지 ===
+
+  - code: CPC_SPIKE
+    name: CPC 급등
+    severity: warning
+    priority: 8.0
+    category: cost
+    data_window: last_7d
+    min_samples: 50
+    condition:
+      overall:
+        cpc_vs_prev_week: "> 1.3"       # 전주 대비 +30%+
+    action_template:
+      - "급등 키워드 3개 상위 식별"
+      - "수동광고로 이관해 CPC 상한 설정"
+      - "경쟁사 입찰 변화 모니터링"
+    llm_hint: "최근 경쟁 심화로 입찰가만 오른 상태. 자동광고의 과속을 제어해야 함."
+
+  - code: ROAS_DROP
+    name: ROAS 급감
+    severity: critical
+    priority: 8.9
+    category: profitability
+    data_window: last_7d
+    min_samples: 50
+    condition:
+      overall:
+        roas_vs_prev_week: "< 0.75"     # 전주 대비 -25%+
+    action_template:
+      - "최근 변경 로그 점검 (썸네일·상세·입찰)"
+      - "전주 대비 CTR·CVR 어느 쪽이 빠졌는지 확인"
+      - "악화 원인별 처방 (이 룰의 결과에 따라 다른 케이스로 분기)"
+      - "필요 시 롤백"
+    llm_hint: "원인 가설을 먼저 세워야 함. 로그·변경 이력 우선 확인."
+
+  - code: SALES_SURGE
+    name: 매출 급증
+    severity: info
+    priority: 7.2
+    category: budget
+    data_window: last_7d
+    min_samples: 50
+    condition:
+      overall:
+        sales_vs_prev_week: "> 1.5"     # 전주 대비 +50%+
+        budget_utilization: "> 0.8"
+    action_template:
+      - "예산 +20~30% 선제 상향"
+      - "재고·배송 캐파 점검"
+      - "연관 키워드 추가 발굴"
+    llm_hint: "수요가 급증 중. 예산이 캡 역할을 하고 있지 않은지 점검."
+
+  - code: IMP_DROP
+    name: 노출수 감소
+    severity: warning
+    priority: 6.9
+    category: reach
+    data_window: last_7d
+    min_samples: 500
+    condition:
+      overall:
+        impressions_vs_prev_week: "< 0.7"
+    action_template:
+      - "품질지수 지표(CTR 추이) 확인"
+      - "입찰가 소폭 상향(+10%) 테스트"
+      - "키워드 차단 리스트에 과도한 제외가 없는지 검토"
+    llm_hint: "노출 자체가 줄었다면 품질지수 혹은 입찰가 문제."
+
+  - code: CVR_DROP
+    name: 전환율 급감
+    severity: critical
+    priority: 8.4
+    category: profitability
+    data_window: last_7d
+    min_samples: 100
+    condition:
+      overall:
+        cvr_vs_prev_week: "< 0.7"
+    action_template:
+      - "최근 14일 상세페이지·가격 변경 이력 확인"
+      - "부정적 리뷰 신규 유입 점검"
+      - "경쟁 상품 가격 조사"
+      - "롤백 또는 상세페이지 즉시 보완"
+    llm_hint: "전환율이 꺾이는 건 상품 신뢰도 이슈. 외부 변수(경쟁·리뷰) 먼저 점검."
+
+  # === 영역 분해 / 전략 ===
+
+  - code: NON_SEARCH_HIGH
+    name: 비검색 우위 (확장 기회)
+    severity: info
+    priority: 5.8
+    category: reach
+    data_window: last_14d
+    min_samples: 50
+    condition:
+      compare_areas:
+        non_search_roas_vs_search_roas: "> 1.3"
+    action_template:
+      - "비검색 영역 입찰 가중치 +20%"
+      - "검색 영역 대형 키워드 제외로 재조준"
+      - "상품 상세 하단 추천 영역 강화"
+    llm_hint: "비검색(상세페이지 추천 등)에서 강함. 이 쪽에 투자 효율이 높음."
+
+  - code: SEARCH_HIGH
+    name: 검색 우위 (키워드 확장 기회)
+    severity: info
+    priority: 5.5
+    category: reach
+    data_window: last_14d
+    min_samples: 50
+    condition:
+      compare_areas:
+        search_roas_vs_non_search_roas: "> 1.3"
+    action_template:
+      - "연관 키워드 2단계 트리 확장 (쿠팡 자동완성 기반)"
+      - "롱테일 수동광고 세팅 (BE-ROAS × 0.9)"
+      - "비검색 영역은 최소 CPC로 유지"
+    llm_hint: "검색 키워드 효율이 좋음. 키워드 발굴로 추가 볼륨을 만들 것."
+
+  # === 정상 ===
+
+  - code: ALL_OK_NORMAL
+    name: 안정 운영
+    severity: info
+    priority: 3.0
+    category: profitability
+    data_window: last_14d
+    min_samples: 50
+    condition:
+      overall:
+        roas: ">= target_roas"
+        cvr: ">= target_cvr"
+        budget_utilization: "0.7 ~ 0.95"
+    action_template:
+      - "현재 설정 유지"
+      - "30일 데이터 누적 후 기준값 미세 조정 검토"
+    llm_hint: "변경 금지. 검증된 설정을 깨지 말 것. 대시보드에서는 노출 우선순위 낮음."
+
+# === 액션 실행 가능 여부 (V1 기준) ===
+#
+# 각 case.action_template의 액션을 UI [적용] 버튼으로 노출할지 결정.
+# 아래 문자열 패턴을 포함한 액션은 V1에서 실행 불가 (executable: false).
+# LLM 프롬프트가 이 목록을 참조해 액션별 executable 플래그를 설정한다.
+
+non_executable_in_v1:
+  - "연관 키워드 2단계 트리"   # V2: 쿠팡 자동완성 API 연동 필요
+  - "연관 키워드 추가 발굴"    # V2: 동일
+  - "외부 트래픽"              # 애드마이저 기능 아님 (인스타/숏폼 등)
+  - "상세페이지"               # 쿠팡 WING에서 수작업
+  - "썸네일 교체"              # 쿠팡 WING에서 수작업
+  - "썸네일 A/B 테스트"         # 외부 툴
+  - "쿠팡 WING"                # 외부 링크만
+  - "가격 경쟁력"              # 가격 비교 크롤링 V2
+  - "경쟁사 입찰"              # 외부 분석
+  - "경쟁 상품 가격"           # 외부 분석
+  - "히트맵 툴"                # 외부 툴
+  - "상품 상세 이탈"           # V2
+  - "1+1"                      # 상품 구성은 쿠팡 WING
+  - "세트"                     # 상품 구성은 쿠팡 WING
+  - "옵션"                     # 상품 구성은 쿠팡 WING
+  - "부정적 리뷰"              # 수작업 대응
+  - "재고"                     # 재고는 쿠팡 WING / ERP
+
+# V1에서 실행 가능한 액션:
+#   - 목표 ROAS 변경 / 예산 변경 / CPC 변경 / 캠페인 ON/OFF
+#   - 키워드 추가/제외 (제한적 — PoC 필요)
+#   - 수동 성과형으로 이관 (원자적 트랜잭션 — PoC 필요)
+#   - 노출시간 설정 (시간대별 ROAS·예산 AND 조건)
+
+# === 우선순위 조정 규칙 ===
+priority_modifiers:
+  budget_impact:
+    desc: "해당 캠페인 광고비가 전체 대비 20% 이상이면 priority +1"
+    rule: "campaign.ad_spend / total.ad_spend > 0.2 => priority += 1"
+  recurring:
+    desc: "같은 case가 3일 연속 매칭되면 priority +0.5"
+    rule: "match_streak >= 3 => priority += 0.5"
+  user_protected:
+    desc: "사용자가 '보호 키워드' 지정한 캠페인이면 적용 액션 중 '제외' 계열은 자동 제거"
+    rule: "if has_protected_keywords then filter_actions(exclude_protected=true)"
+  change_family_dedup:
+    desc: |
+      변화 계열(CPC_SPIKE, ROAS_DROP, CVR_DROP, IMP_DROP, SALES_SURGE)은
+      한 근본 원인(예: 썸네일 변경)이 여러 지표 동시 변동을 유발하는 경우가 많음.
+      같은 캠페인 내에서 두 개 이상 매칭되면 priority 가장 높은 1개만 표시하고,
+      나머지는 해당 카드의 "관련 증상" 섹션으로 통합.
+    rule: |
+      group_by(campaign_id) => filter(category == "cost" | "profitability" | "reach")
+      => keep_top_priority + append_others_as_related_symptoms
+  all_ok_suppress:
+    desc: "ALL_OK_NORMAL은 다른 케이스가 하나도 매칭되지 않을 때만 노출"
+    rule: "ALL_OK_NORMAL displays only if other_matches == 0"
+
+# === 공식 반영 시간 (PoC 결과 반영 예정) ===
+# common-patterns.md 의 변경 미리보기 모달 '반영 시간 고지' 표와 동기화 유지.
+# LLM 프롬프트가 "최대 15초" 같은 비현실적 표현 생성하지 않도록 가드레일.
+reflection_time_hints:
+  budget_change: "일반 15분 내 반영"
+  target_roas_change: "15분 ~ 1시간 내 반영"
+  keyword_cpc_change: "수 분 내 반영"
+  keyword_exclusion: "30분 내 반영"
+  campaign_on_off: "수 분 내 반영"
